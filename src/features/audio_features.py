@@ -12,6 +12,7 @@ from typing import Sequence
 import numpy as np
 
 from data.manifest import VALID_SPLITS
+from features.model_loading import resolve_model_source
 
 OFFICIAL_AUDIO_MODEL = "airesearch/wav2vec2-large-xlsr-53-th"
 OFFICIAL_AUDIO_POOLING = "last_hidden_state.mean(dim=1)"
@@ -235,12 +236,14 @@ class Wav2VecFrameExtractor:
         model: object,
         config: AudioFeatureConfig,
         device: str | None = None,
+        resolved_model_path: str | None = None,
     ) -> None:
         config.validate()
         self.processor = processor
         self.model = model
         self.config = config
         self.device = device
+        self.resolved_model_path = resolved_model_path
 
     @classmethod
     def from_pretrained(
@@ -250,20 +253,32 @@ class Wav2VecFrameExtractor:
         device: str | None = None,
         local_files_only: bool = False,
     ) -> "Wav2VecFrameExtractor":
-        from transformers import AutoModel, AutoProcessor
-
-        processor = AutoProcessor.from_pretrained(
+        model_source = resolve_model_source(
             config.model_id,
             local_files_only=local_files_only,
         )
+        from transformers import AutoModel, AutoProcessor
+
+        processor = AutoProcessor.from_pretrained(
+            model_source,
+            local_files_only=local_files_only,
+        )
         model = AutoModel.from_pretrained(
-            config.model_id,
+            model_source,
             local_files_only=local_files_only,
         )
         if device is not None:
             model = model.to(device)
         model.eval()
-        return cls(processor=processor, model=model, config=config, device=device)
+        return cls(
+            processor=processor,
+            model=model,
+            config=config,
+            device=device,
+            resolved_model_path=(
+                model_source if local_files_only else None
+            ),
+        )
 
     def extract(self, item: AudioFeatureInput) -> AudioFrameFeatureResult:
         import torch

@@ -38,6 +38,12 @@ Fast-tokenizer offset mappings are mandatory. The extractor raises on unmapped
 non-whitespace characters by default and records truncation. Character states are
 derived only from tokenizer offsets; they do not assert word boundaries or timing.
 
+With `local_files_only=True`, the loader enables strict Hugging Face offline mode,
+resolves the requested model ID to a cached snapshot directory, and passes that
+directory to Transformers. This prevents PEFT adapter discovery from making an
+unexpected HTTP request. A missing or incomplete cache fails without a network
+fallback.
+
 ## Audio
 
 Implementation: `src/features/audio_features.py`

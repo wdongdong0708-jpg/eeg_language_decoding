@@ -19,12 +19,14 @@ dependencies = [
 
 [project.optional-dependencies]
 audio = [
+  "huggingface-hub>=0.23",
   "librosa>=0.10",
   "soundfile>=0.12",
   "torchaudio>=2.1",
   "transformers>=4.40",
 ]
 features = [
+  "huggingface-hub>=0.23",
   "soundfile>=0.12",
   "torchaudio>=2.1",
   "transformers>=4.40",

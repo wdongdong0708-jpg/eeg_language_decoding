@@ -34,7 +34,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-length", type=int, default=512)
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--device", default=None)
-    parser.add_argument("--local-files-only", action="store_true")
+    parser.add_argument(
+        "--local-files-only",
+        action="store_true",
+        help=(
+            "Strict offline mode: resolve a cached snapshot directory and "
+            "forbid Hugging Face Hub HTTP access."
+        ),
+    )
     return parser.parse_args()
 
 

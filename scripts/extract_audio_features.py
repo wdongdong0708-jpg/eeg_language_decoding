@@ -32,7 +32,14 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--layer-index", type=int, default=-1)
     parser.add_argument("--device", default=None)
-    parser.add_argument("--local-files-only", action="store_true")
+    parser.add_argument(
+        "--local-files-only",
+        action="store_true",
+        help=(
+            "Strict offline mode: resolve a cached snapshot directory and "
+            "forbid Hugging Face Hub HTTP access."
+        ),
+    )
     return parser.parse_args()
 
 

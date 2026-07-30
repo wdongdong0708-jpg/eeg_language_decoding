@@ -12,6 +12,7 @@ from typing import Literal, Sequence
 import numpy as np
 
 from data.alignment import is_highlighted_character
+from features.model_loading import resolve_model_source
 
 OFFICIAL_TEXT_MODEL = "bert-base-chinese"
 OFFICIAL_TEXT_POOLING = "last_hidden_state.mean(dim=1)"
@@ -268,6 +269,7 @@ class TextEmbeddingExtractor:
         model: object,
         config: TextFeatureConfig,
         device: str | None = None,
+        resolved_model_path: str | None = None,
     ) -> None:
         config.validate()
         if not getattr(tokenizer, "is_fast", False):
@@ -276,6 +278,7 @@ class TextEmbeddingExtractor:
         self.model = model
         self.config = config
         self.device = device
+        self.resolved_model_path = resolved_model_path
 
     @classmethod
     def from_pretrained(
@@ -285,21 +288,33 @@ class TextEmbeddingExtractor:
         device: str | None = None,
         local_files_only: bool = False,
     ) -> "TextEmbeddingExtractor":
+        model_source = resolve_model_source(
+            config.model_id,
+            local_files_only=local_files_only,
+        )
         from transformers import AutoModel, AutoTokenizer
 
         tokenizer = AutoTokenizer.from_pretrained(
-            config.model_id,
+            model_source,
             use_fast=True,
             local_files_only=local_files_only,
         )
         model = AutoModel.from_pretrained(
-            config.model_id,
+            model_source,
             local_files_only=local_files_only,
         )
         if device is not None:
             model = model.to(device)
         model.eval()
-        return cls(tokenizer=tokenizer, model=model, config=config, device=device)
+        return cls(
+            tokenizer=tokenizer,
+            model=model,
+            config=config,
+            device=device,
+            resolved_model_path=(
+                model_source if local_files_only else None
+            ),
+        )
 
     def extract(self, items: Sequence[TextFeatureInput]) -> list[TextFeatureResult]:
         import torch

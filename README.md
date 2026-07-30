@@ -102,7 +102,8 @@ token 级、字符级 hidden state 和原文 offset：
 python scripts/extract_text_features.py `
   --input-jsonl metadata/text_blocks.jsonl `
   --output-dir experiments/features/text `
-  --device cuda
+  --device cuda `
+  --local-files-only
 ```
 
 音频特征输入必须已经在 manifest/block 层定义好 `content_id`、继承的
@@ -112,8 +113,12 @@ python scripts/extract_text_features.py `
 python scripts/extract_audio_features.py `
   --input-jsonl metadata/audio_blocks.jsonl `
   --output-dir experiments/features/audio `
-  --device cuda
+  --device cuda `
+  --local-files-only
 ```
+
+`--local-files-only` 会自动启用严格 Hugging Face 离线模式，并先把模型 ID
+解析为本机缓存的 snapshot 目录；缓存不完整时立即失败，不允许联网 fallback。
 
 ## 分阶段路线
 
