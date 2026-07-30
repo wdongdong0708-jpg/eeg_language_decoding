@@ -34,6 +34,17 @@ _NON_HIGHLIGHTED = frozenset(
 )
 
 
+def is_highlighted_character(character: str) -> bool:
+    """Return whether the experiment presentation advances on this character."""
+
+    if len(character) != 1:
+        raise ValueError("Expected exactly one Unicode character")
+    category = unicodedata.category(character)
+    return character not in _NON_HIGHLIGHTED and not category.startswith(
+        ("P", "Z", "C")
+    )
+
+
 def validate_alignment_claim(
     *,
     method: AlignmentMethod,
@@ -68,8 +79,7 @@ def fixed_character_presentation_spans(
     spans: list[CharacterPresentationSpan] = []
     step = 0
     for source_index, character in enumerate(text):
-        category = unicodedata.category(character)
-        if character in _NON_HIGHLIGHTED or category.startswith(("P", "Z", "C")):
+        if not is_highlighted_character(character):
             continue
         start = onset_sec + step * pace_sec
         spans.append(
@@ -82,4 +92,3 @@ def fixed_character_presentation_spans(
         )
         step += 1
     return spans
-

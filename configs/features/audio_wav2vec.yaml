@@ -1,0 +1,18 @@
+model_id: airesearch/wav2vec2-large-xlsr-53-th
+layer_index: -1
+target_sample_rate_hz: 16000
+source_audio_sample_rate_hz: 12000
+channel_mix: mean_to_mono
+output: frame_hidden_states
+frame_timing: convolution_receptive_field
+preserve:
+  - frame_index
+  - frame_start_sec
+  - frame_stop_sec
+  - hidden_state
+  - source_block_id
+  - content_id
+  - split
+  - source_start_sample
+  - source_stop_sample
+output_dtype: float32

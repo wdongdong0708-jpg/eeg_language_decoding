@@ -6,8 +6,9 @@ EEG→文本、EEG→语音片段检索。首要目标是排除时长、字符�
 
 ## 当前阶段
 
-本仓库目前完成了研究骨架、数据契约和首批防泄漏基础设施。尚未生成
-manifest、特征或训练结果，也没有修改或重新预处理任何原始/官方 EEG 数据。
+本仓库目前完成了研究骨架、数据契约、全量只读数据审计，以及文本/音频
+多粒度特征接口。尚未生成正式 manifest、全量特征或训练结果，也没有修改或
+重新预处理任何原始/官方 EEG 数据。
 
 已审阅的官方代码版本：
 
@@ -16,8 +17,11 @@ manifest、特征或训练结果，也没有修改或重新预处理任何原始
 - 目录：`data_preprocessing/`、`embeddings/`、`novel_segmentation/`、
   `experiment/`
 
-初始数据审阅记录见
-[`reports/initial_data_audit.md`](reports/initial_data_audit.md)。
+机器可读与可读版审计见
+[`reports/data_audit.json`](reports/data_audit.json) 和
+[`reports/data_audit.md`](reports/data_audit.md)；特征字段和时间语义见
+[`metadata/feature_schema.md`](metadata/feature_schema.md)，当前验证边界见
+[`reports/feature_pipeline_validation.md`](reports/feature_pipeline_validation.md)。
 
 ## 科学约束
 
@@ -80,7 +84,35 @@ python -m pytest
 若需要以 editable 方式安装：
 
 ```powershell
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[features,dev]"
+```
+
+复跑只读数据审计：
+
+```powershell
+python scripts/audit_data.py `
+  --json-output reports/data_audit.json `
+  --markdown-output reports/data_audit.md
+```
+
+文本特征输入是每行包含 `content_id`、`text` 的 JSONL；输出同时保存句级、
+token 级、字符级 hidden state 和原文 offset：
+
+```powershell
+python scripts/extract_text_features.py `
+  --input-jsonl metadata/text_blocks.jsonl `
+  --output-dir experiments/features/text `
+  --device cuda
+```
+
+音频特征输入必须已经在 manifest/block 层定义好 `content_id`、继承的
+`split` 与 `start_sec`/`stop_sec`，输出不做时间池化的 wav2vec frame：
+
+```powershell
+python scripts/extract_audio_features.py `
+  --input-jsonl metadata/audio_blocks.jsonl `
+  --output-dir experiments/features/audio `
+  --device cuda
 ```
 
 ## 分阶段路线
@@ -93,4 +125,3 @@ python -m pip install -e ".[dev]"
 5. EEG–文本主线：句级和局部片段检索、长度匹配候选池。
 6. RA 与跨范式：区分视觉呈现、发音运动、肌电、听觉反馈和语义贡献。
 7. 统计评测：多 seed、受试者 bootstrap/permutation、置信区间和消融。
-

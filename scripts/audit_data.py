@@ -1,8 +1,4 @@
-"""Audit dataset paths and count BIDS BrainVision/event files.
-
-This first-stage audit is intentionally read-only. Deeper row/text/audio
-alignment checks will be added after the manifest schema is reviewed.
-"""
+"""Run the complete read-only EEG/text/audio audit."""
 
 from __future__ import annotations
 
@@ -10,52 +6,68 @@ import argparse
 import json
 from pathlib import Path
 
-
-DEFAULT_ROOTS = {
-    "chineseeeg1": Path(
-        "D:/dataset/ChineseEEG/derivatives/preproc/filtered_0.5_30"
-    ),
-    "chineseeeg2_pl": Path(
-        "D:/dataset/ChineseEEG-2/PassiveListening/derivatives/preprocessed"
-    ),
-    "chineseeeg2_ra": Path(
-        "D:/dataset/ChineseEEG-2/ReadingAloud/derivatives/preprocessed"
-    ),
-}
-
-
-def audit_root(root: Path) -> dict[str, object]:
-    if not root.is_dir():
-        return {"root": str(root), "exists": False}
-    headers = sorted(root.rglob("*_eeg.vhdr"))
-    events = sorted(root.rglob("*_events.tsv"))
-    return {
-        "root": str(root.resolve()),
-        "exists": True,
-        "brainvision_headers": len(headers),
-        "event_tables": len(events),
-        "header_event_count_match": len(headers) == len(events),
-        "subjects": sorted(path.name for path in root.glob("sub-*") if path.is_dir()),
-    }
+from data.audit import audit_to_markdown, build_full_audit
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--root",
-        action="append",
+        "--chineseeeg1-root",
         type=Path,
-        help="Optional dataset root; may be supplied more than once.",
+        default=Path("D:/dataset/ChineseEEG/derivatives/preproc/filtered_0.5_30"),
     )
+    parser.add_argument(
+        "--chineseeeg1-derivatives-root",
+        type=Path,
+        default=Path("D:/dataset/ChineseEEG/derivatives"),
+    )
+    parser.add_argument(
+        "--pl-root",
+        type=Path,
+        default=Path(
+            "D:/dataset/ChineseEEG-2/PassiveListening/derivatives/preprocessed"
+        ),
+    )
+    parser.add_argument(
+        "--ra-root",
+        type=Path,
+        default=Path(
+            "D:/dataset/ChineseEEG-2/ReadingAloud/derivatives/preprocessed"
+        ),
+    )
+    parser.add_argument(
+        "--materials-root",
+        type=Path,
+        default=Path("D:/dataset/ChineseEEG-2/materials&embeddings"),
+    )
+    parser.add_argument("--json-output", type=Path)
+    parser.add_argument("--markdown-output", type=Path)
     return parser.parse_args()
+
+
+def _write(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8", newline="\n")
 
 
 def main() -> None:
     args = parse_args()
-    roots = args.root if args.root else list(DEFAULT_ROOTS.values())
-    print(json.dumps([audit_root(root) for root in roots], ensure_ascii=False, indent=2))
+    audit = build_full_audit(
+        chineseeeg1_root=args.chineseeeg1_root,
+        chineseeeg2_pl_root=args.pl_root,
+        chineseeeg2_ra_root=args.ra_root,
+        chineseeeg1_derivatives_root=args.chineseeeg1_derivatives_root,
+        chineseeeg2_materials_root=args.materials_root,
+    )
+    json_text = json.dumps(audit, ensure_ascii=False, indent=2)
+    markdown_text = audit_to_markdown(audit)
+    if args.json_output:
+        _write(args.json_output, json_text + "\n")
+    if args.markdown_output:
+        _write(args.markdown_output, markdown_text + "\n")
+    if not args.json_output and not args.markdown_output:
+        print(json_text)
 
 
 if __name__ == "__main__":
     main()
-

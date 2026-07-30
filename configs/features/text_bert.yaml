@@ -1,0 +1,23 @@
+model_id: bert-base-chinese
+layer_index: -1
+outputs:
+  sentence_hidden_state: true
+  token_hidden_states: true
+  character_hidden_states: true
+sentence_pooling: mean_content_tokens
+preserve:
+  - token_index
+  - token_id
+  - token_string
+  - character_offset
+  - special_token_mask
+  - hidden_state
+character_alignment:
+  method: tokenizer_offset_overlap
+  include_punctuation: true
+  preserve_highlight_mask: true
+  strict: true
+max_length: 512
+batch_size: 16
+output_dtype: float32
+
