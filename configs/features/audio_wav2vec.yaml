@@ -1,9 +1,12 @@
 model_id: airesearch/wav2vec2-large-xlsr-53-th
-layer_index: -1
+layer_indices: [14, 15, 16, 17, 18]
+layer_average_only: true
+temporal_pooling: false
 target_sample_rate_hz: 16000
 source_audio_sample_rate_hz: 12000
 channel_mix: mean_to_mono
-output: frame_hidden_states
+output: interpolated_sequence_hidden_states
+output_shape: [1024, eeg_window_samples]
 frame_timing: convolution_receptive_field
 preserve:
   - frame_index

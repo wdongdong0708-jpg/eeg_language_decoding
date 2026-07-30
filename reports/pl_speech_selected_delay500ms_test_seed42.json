@@ -1,0 +1,31 @@
+{
+  "active_eeg_delay_ms": 500.0,
+  "candidate_count": 38,
+  "checkpoint": "experiments/pl_delay_sweep/models/delay_500ms/checkpoint.pt",
+  "checkpoint_sha256": "6e6a80d7011d49886982f9f4c915813ad405f327a23e95f6769bff73ec89dd3e",
+  "metrics": {
+    "global": {
+      "mean_reciprocal_rank": 0.12094814592518956,
+      "median_rank": 16.0,
+      "recall_at_1": 0.02666666666666667,
+      "recall_at_10": 0.34,
+      "recall_at_5": 0.12666666666666668
+    },
+    "position_local": {
+      "mean_reciprocal_rank": 0.19700693639006328,
+      "median_rank": 9.5,
+      "recall_at_1": 0.06,
+      "recall_at_10": 0.5666666666666667,
+      "recall_at_5": 0.32
+    }
+  },
+  "partition": "test",
+  "position_local_pool_size": 20,
+  "query_count": 150,
+  "schema_version": "pl-speech-checkpoint-evaluation-v1",
+  "tie_policy": "pessimistic",
+  "training_report": "experiments/pl_delay_sweep/models/delay_500ms/report.json",
+  "training_report_sha256": "9655cb62272a7eee5606fcb02fb29fb26db357c7fd744085e34e85fba88bb93a",
+  "window_index": "experiments/pl_delay_sweep/windows_delay_500ms_common.jsonl",
+  "window_index_sha256": "47c16124c2130048c74cbd7a7568faa791b31f703675309ed4aa1134cf73324c"
+}

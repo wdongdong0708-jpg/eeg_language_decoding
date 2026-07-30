@@ -2,13 +2,18 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import torch
 
 from features.audio_features import (
     AudioFeatureConfig,
     AudioFeatureInput,
+    average_hidden_layers,
     assemble_audio_frame_features,
     convolution_geometry,
+    interpolate_audio_sequence,
     load_audio_frame_features,
+    load_audio_sequence_features,
+    save_audio_sequence_features,
     save_audio_frame_features,
 )
 
@@ -71,3 +76,32 @@ def test_audio_feature_input_rejects_unknown_split() -> None:
     )
     with pytest.raises(ValueError, match="Unknown inherited split"):
         item.validate()
+
+
+def test_selected_layers_are_averaged_without_time_pooling() -> None:
+    hidden_states = tuple(
+        torch.full((1, 5, 3), float(index)) for index in range(20)
+    )
+    averaged = average_hidden_layers(hidden_states, (14, 15, 16, 17, 18))
+    assert averaged.shape == (1, 5, 3)
+    assert torch.all(averaged == 16.0)
+
+
+def test_audio_sequence_interpolation_preserves_channels() -> None:
+    frames = np.arange(12, dtype=np.float32).reshape(4, 3)
+    sequence = interpolate_audio_sequence(frames, target_time_steps=10)
+    assert sequence.shape == (3, 10)
+
+
+def test_audio_sequence_npz_roundtrip(tmp_path: Path) -> None:
+    path = tmp_path / "sequence.npz"
+    save_audio_sequence_features(
+        path,
+        audio_target_id="target-1",
+        result=_result(),
+        target_time_steps=25,
+    )
+    metadata, features = load_audio_sequence_features(path)
+    assert metadata["audio_target_id"] == "target-1"
+    assert metadata["temporal_pooling"] is False
+    assert features.shape == (2, 25)

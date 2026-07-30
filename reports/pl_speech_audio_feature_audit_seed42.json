@@ -1,0 +1,30 @@
+{
+  "feature_index": "experiments/features/pl_speech_wav2vec_3s/feature_index.jsonl",
+  "feature_index_sha256": "abac38e25afea41e44c8594df19ab9b1f0de601e40e606344a73a8149f8c37e3",
+  "layer_indices": [
+    14,
+    15,
+    16,
+    17,
+    18
+  ],
+  "layer_reduction": "arithmetic_mean",
+  "model_id": "airesearch/wav2vec2-large-xlsr-53-th",
+  "resolved_model_path": "C:\\Users\\Administrator\\.cache\\huggingface\\hub\\models--airesearch--wav2vec2-large-xlsr-53-th\\snapshots\\3155938c549b23eee16b1d4b55dcb161b7fe4bcf",
+  "schema_version": "pl-audio-feature-audit-v1",
+  "status_counts": {
+    "existing": 688
+  },
+  "target_count": 688,
+  "target_counts_by_partition": {
+    "test": 76,
+    "train": 559,
+    "validation": 53
+  },
+  "target_time_steps": [
+    750
+  ],
+  "temporal_pooling": false,
+  "window_jsonl": "metadata/pl_speech_windows_seed42_3s_delay_000ms.jsonl",
+  "window_jsonl_sha256": "a2f63b4a7e677462575161b2257049784642bbd18d2376f1d190536d6cecb861"
+}

@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from features.audio_features import (
+    DEFAULT_AUDIO_LAYERS,
     AudioFeatureConfig,
     AudioFeatureInput,
     Wav2VecFrameExtractor,
@@ -30,7 +31,16 @@ def parse_args() -> argparse.Namespace:
         "--model-id",
         default="airesearch/wav2vec2-large-xlsr-53-th",
     )
-    parser.add_argument("--layer-index", type=int, default=-1)
+    parser.add_argument(
+        "--layers",
+        default=",".join(str(value) for value in DEFAULT_AUDIO_LAYERS),
+        help="Comma-separated hidden-state layers to average; preserves time.",
+    )
+    parser.add_argument(
+        "--layer-index",
+        type=int,
+        help="Legacy single-layer mode; disables --layers when provided.",
+    )
     parser.add_argument("--device", default=None)
     parser.add_argument(
         "--local-files-only",
@@ -87,7 +97,16 @@ def main() -> None:
     args = parse_args()
     config = AudioFeatureConfig(
         model_id=args.model_id,
-        layer_index=args.layer_index,
+        layer_index=-1 if args.layer_index is None else args.layer_index,
+        layer_indices=(
+            tuple(
+                int(value.strip())
+                for value in args.layers.split(",")
+                if value.strip()
+            )
+            if args.layer_index is None
+            else ()
+        ),
     )
     extractor = Wav2VecFrameExtractor.from_pretrained(
         config,

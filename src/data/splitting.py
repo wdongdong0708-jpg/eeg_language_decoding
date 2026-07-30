@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import math
 from dataclasses import dataclass
 from typing import Iterable, Literal
 
@@ -64,6 +65,116 @@ def assign_content_groups(
     }
 
 
+def quota_counts(
+    group_count: int,
+    *,
+    ratios: SplitRatios = SplitRatios(),
+    require_validation_and_test: bool = True,
+) -> dict[SplitName, int]:
+    """Choose deterministic integer quotas closest to requested group ratios.
+
+    This is intended for small subject cohorts, where independent hash thresholds
+    can leave validation or test empty. Quotas are selected at the group level;
+    trial counts are never used.
+    """
+
+    ratios.validate()
+    if group_count < 0:
+        raise ValueError("group_count cannot be negative")
+    if group_count == 0:
+        return {"train": 0, "valid": 0, "test": 0}
+    if require_validation_and_test and group_count < 3:
+        raise ValueError(
+            "At least three groups are required to keep train, validation and test non-empty"
+        )
+
+    requested = {
+        "train": ratios.train * group_count,
+        "valid": ratios.valid * group_count,
+        "test": ratios.test * group_count,
+    }
+    minimum = {
+        "train": 1,
+        "valid": int(require_validation_and_test),
+        "test": int(require_validation_and_test),
+    }
+    candidates: list[tuple[float, float, int, int, int]] = []
+    for train_count in range(minimum["train"], group_count + 1):
+        for valid_count in range(minimum["valid"], group_count - train_count + 1):
+            test_count = group_count - train_count - valid_count
+            if test_count < minimum["test"]:
+                continue
+            absolute_error = sum(
+                abs(observed - requested[name])
+                for name, observed in (
+                    ("train", train_count),
+                    ("valid", valid_count),
+                    ("test", test_count),
+                )
+            )
+            squared_error = sum(
+                math.pow(observed - requested[name], 2)
+                for name, observed in (
+                    ("train", train_count),
+                    ("valid", valid_count),
+                    ("test", test_count),
+                )
+            )
+            # Prefer train, then validation, on exact objective ties.
+            candidates.append(
+                (
+                    absolute_error,
+                    squared_error,
+                    -train_count,
+                    -valid_count,
+                    test_count,
+                )
+            )
+    if not candidates:
+        raise ValueError("No feasible quota allocation")
+    _, _, negative_train, negative_valid, test_count = min(candidates)
+    return {
+        "train": -negative_train,
+        "valid": -negative_valid,
+        "test": test_count,
+    }
+
+
+def assign_groups_by_quota(
+    group_ids: Iterable[str],
+    *,
+    seed: int | str,
+    ratios: SplitRatios = SplitRatios(),
+    require_validation_and_test: bool = True,
+) -> dict[str, SplitName]:
+    """Hash-rank unique groups, then allocate deterministic integer quotas."""
+
+    unique_ids = sorted(set(group_ids))
+    if any(not group_id for group_id in unique_ids):
+        raise ValueError("group IDs cannot be empty")
+    quotas = quota_counts(
+        len(unique_ids),
+        ratios=ratios,
+        require_validation_and_test=require_validation_and_test,
+    )
+    ordered = sorted(
+        unique_ids,
+        key=lambda group_id: (stable_hash_fraction(group_id, seed=seed), group_id),
+    )
+    train_end = quotas["train"]
+    valid_end = train_end + quotas["valid"]
+    return {
+        group_id: (
+            "train"
+            if index < train_end
+            else "valid"
+            if index < valid_end
+            else "test"
+        )
+        for index, group_id in enumerate(ordered)
+    }
+
+
 def assert_group_split_integrity(
     rows: Iterable[dict[str, object]],
     *,
@@ -81,4 +192,3 @@ def assert_group_split_integrity(
     if violations:
         preview = dict(list(violations.items())[:5])
         raise ValueError(f"Group split leakage detected: {preview}")
-

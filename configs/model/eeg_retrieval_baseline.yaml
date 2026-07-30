@@ -1,16 +1,28 @@
 encoder:
-  name: temporal_conv_transformer
+  name: dilated_simple_conv
   input_channels: 128
-  hidden_dim: 256
-  output_dim: 256
-  dropout: 0.1
-projection:
-  output_dim: 256
-  normalize: true
+  hidden_channels: 320
+  output_channels: 1024
+  depth: 4
+  kernel_size: 5
+  growth: 1.0
+  dilation_growth: 2
+  dilation_period: null
+  dropout: 0.0
+  dropout_input: 0.0
+  batch_norm: false
+  residual: false
+  activation_on_last: false
+sequence_output:
+  preserve_time: true
+  target_time_steps: 750
 contrastive:
+  norm_kind: y
   temperature: 0.07
   learnable_temperature: false
+  symmetric: false
+  center: false
+  temporal_pooling: false
 mask_inputs:
   expose_valid_length_to_encoder: false
   expose_padding_mask_to_pooler: false
-

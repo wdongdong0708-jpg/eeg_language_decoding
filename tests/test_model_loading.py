@@ -162,7 +162,7 @@ def test_audio_extractor_loads_resolved_directory(
             calls.append(("processor", path))
             return object()
 
-    class AutoModel:
+    class Wav2Vec2Model:
         @classmethod
         def from_pretrained(cls, path: str, **_: object) -> _FakeModel:
             calls.append(("model", path))
@@ -171,7 +171,10 @@ def test_audio_extractor_loads_resolved_directory(
     monkeypatch.setitem(
         sys.modules,
         "transformers",
-        SimpleNamespace(AutoModel=AutoModel, AutoProcessor=AutoProcessor),
+        SimpleNamespace(
+            AutoProcessor=AutoProcessor,
+            Wav2Vec2Model=Wav2Vec2Model,
+        ),
     )
     monkeypatch.setattr(
         "features.audio_features.resolve_model_source",

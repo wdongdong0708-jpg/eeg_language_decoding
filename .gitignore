@@ -16,7 +16,12 @@ experiments/*
 reports/generated/*
 splits/*
 !splits/README.md
+!splits/text_unseen_seed42.json
+!splits/subject_text_unseen_seed42.json
+!splits/cross_paradigm_seed42.json
 metadata/generated/*
+# Local audit export; retained on disk but too large for the Git repository.
+metadata/all_trials.csv
 
 *.ckpt
 *.pt
@@ -25,4 +30,3 @@ metadata/generated/*
 *.npy
 *.npz
 *.parquet
-

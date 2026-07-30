@@ -1,14 +1,81 @@
-experiment_name: pl_speech_retrieval_unit_test
-data: chineseeeg2_pl
-preprocessing: official_preprocessed
+experiment_name: pl_eeg_speech_sequence_baseline
+seed: 42
+device: cuda
+
+data:
+  dataset: ChineseEEG2
+  paradigm: passive_listening
+  manifest: metadata/all_trials.parquet
+  split_artifact: splits/text_unseen_seed42.json
+  split_setting: A_text_unseen_subject_seen
+
 window:
-  length_sec: 4.0
-  stride_sec: 2.0
+  length_sec: 3.0
+  stride_sec: 3.0
   tail_policy: drop
-split:
-  protocol: deterministic_content_group
-  seed: 20260730
-objective: symmetric_info_nce
+  allow_overlap: false
+  active_eeg_delay_ms: 0
+  eeg_delay_search_ms: [0, 100, 200, 300, 400, 500]
+  delay_selection_partition: validation
+  test_evaluated_once_after_delay_selection: true
+
+window_index: metadata/pl_speech_windows_seed42_3s_delay_000ms.jsonl
+audio_feature_dir: experiments/features/pl_speech_wav2vec_3s
+eeg_normalization: per_window_channel_zscore
+
+audio_target:
+  model_id: airesearch/wav2vec2-large-xlsr-53-th
+  model_sample_rate_hz: 16000
+  hidden_layers: [14, 15, 16, 17, 18]
+  layer_reduction: arithmetic_mean
+  temporal_pooling: false
+  output_channels: 1024
+  interpolate_to_eeg_samples: true
+
+model:
+  name: dilated_simple_conv
+  hidden_channels: 320
+  depth: 4
+  kernel_size: 5
+  growth: 1.0
+  dilation_growth: 2
+  dilation_period: null
+  dropout: 0.0
+  dropout_input: 0.0
+  batch_norm: false
+  residual: false
+  activation_on_last: false
+
+loss:
+  name: clip_contrastive_sequence
+  norm_kind: y
+  temperature: 0.07
+  learn_temperature: false
+  symmetric: false
+  center: false
+  pool: false
+  multi_positive: false
+
+training:
+  batch_size: 4
+  epochs: 20
+  learning_rate: 0.0001
+  weight_decay: 0.0001
+  gradient_clip_norm: 1.0
+  num_workers: 0
+  unique_audio_target_per_batch: true
+  cache_speech_targets: true
+
+evaluation:
+  candidate_identity: audio_target_id
+  unique_candidates: true
+  tie_policy: pessimistic
+  query_batch_size: 2
+  candidate_batch_size: 4
+  position_local_pool_size: 20
+  smoke_max_queries: 4
+  metrics: [recall_at_1, recall_at_5, recall_at_10, median_rank, mean_reciprocal_rank]
+
 required_controls:
   - random
   - duration_only
@@ -16,3 +83,4 @@ required_controls:
   - subject_id_only
   - audio_envelope
 
+output_dir: experiments/pl_speech_retrieval_seed42_delay000ms

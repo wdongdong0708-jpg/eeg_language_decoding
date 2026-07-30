@@ -1,0 +1,90 @@
+{
+  "builder_version": "trial-manifest-v1",
+  "cross_dataset_text_alignment": {
+    "garnettdream": {
+      "exact": 143,
+      "fuzzy": 1,
+      "unresolved": 9474
+    },
+    "littleprince": {
+      "exact": 150,
+      "fuzzy": 14,
+      "unresolved": 2333
+    }
+  },
+  "excluded_chapter_marker_pairs": 810,
+  "paradigm_counts": {
+    "passive_listening": 40302,
+    "reading_aloud": 20440,
+    "silent_reading": 107414
+  },
+  "pl_littleprince_audio_validation": {
+    "f1": {
+      "audio_start_count": 28,
+      "duration_char_count_pearson": 0.997901115153627,
+      "duration_residual_p95_sec": 0.053999999999999826,
+      "events_data": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\littleprince_f1\\events_data.json",
+      "row_count": 2854,
+      "text_unit_count": 2854,
+      "validated": true,
+      "wav_count": 28
+    },
+    "m1": {
+      "audio_start_count": 28,
+      "duration_char_count_pearson": 0.9979329683819174,
+      "duration_residual_p95_sec": 0.052000000000000046,
+      "events_data": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\littleprince_m1\\events_data.json",
+      "row_count": 2854,
+      "text_unit_count": 2854,
+      "validated": true,
+      "wav_count": 28
+    }
+  },
+  "quality_flag_counts": {
+    "broken_brainvision_reference": 1346,
+    "broken_brainvision_reference|unresolved_text_alignment": 84918,
+    "event_text_count_mismatch": 1,
+    "event_text_count_mismatch|implausible_eeg_trial_duration|missing_text|orphan_row_event_in_recording|pl_audio_mapping_unverified|unresolved_text_alignment": 2,
+    "event_text_count_mismatch|implausible_eeg_trial_duration|orphan_row_event_in_recording": 1,
+    "event_text_count_mismatch|material_variant_uncertain|missing_text|orphan_row_event_in_recording|ra_audio_boundary_unavailable|unresolved_text_alignment": 3,
+    "event_text_count_mismatch|orphan_row_event_in_recording": 1605,
+    "event_text_count_mismatch|orphan_row_event_in_recording|pl_audio_mapping_unverified": 659,
+    "event_text_count_mismatch|orphan_row_event_in_recording|ra_audio_boundary_unavailable": 680,
+    "event_text_count_mismatch|pl_audio_mapping_unverified": 920,
+    "event_text_count_mismatch|ra_audio_boundary_unavailable": 690,
+    "events_vmrk_count_mismatch": 41,
+    "implausible_eeg_trial_duration|pl_audio_mapping_unverified": 4,
+    "implausible_eeg_trial_duration|ra_audio_boundary_unavailable": 1,
+    "material_variant_uncertain|missing_text|orphan_row_event_in_recording|ra_audio_boundary_unavailable|unresolved_text_alignment": 2,
+    "material_variant_uncertain|missing_text|pl_audio_mapping_unverified|unresolved_text_alignment": 4,
+    "material_variant_uncertain|missing_text|ra_audio_boundary_unavailable|unresolved_text_alignment": 3,
+    "missing_text|orphan_row_event_in_recording|prechapter_trial_unresolved|unresolved_text_alignment": 14,
+    "ok": 21100,
+    "orphan_row_event_in_recording": 200,
+    "orphan_row_event_in_recording|ra_audio_boundary_unavailable": 207,
+    "orphan_row_event_in_recording|unresolved_text_alignment": 2928,
+    "pl_audio_mapping_unverified": 16933,
+    "ra_audio_boundary_unavailable": 18854,
+    "unresolved_text_alignment": 17040
+  },
+  "recordings_without_legal_pairs": [
+    "D:\\dataset\\ChineseEEG-2\\PassiveListening\\derivatives\\preprocessed\\sub-04\\ses-littleprince\\eeg\\sub-04_ses-littleprince_task-lis_run-27_eeg.vhdr",
+    "D:\\dataset\\ChineseEEG-2\\PassiveListening\\derivatives\\preprocessed\\sub-04\\ses-littleprince\\eeg\\sub-04_ses-littleprince_task-lis_run-28_eeg.vhdr",
+    "D:\\dataset\\ChineseEEG-2\\PassiveListening\\derivatives\\preprocessed\\sub-04\\ses-littleprince\\eeg\\sub-04_ses-littleprince_task-lis_run-29_eeg.vhdr",
+    "D:\\dataset\\ChineseEEG-2\\PassiveListening\\derivatives\\preprocessed\\sub-04\\ses-littleprince\\eeg\\sub-04_ses-littleprince_task-lis_run-210_eeg.vhdr",
+    "D:\\dataset\\ChineseEEG-2\\PassiveListening\\derivatives\\preprocessed\\sub-05\\ses-littleprince\\eeg\\sub-05_ses-littleprince_task-lis_run-114_eeg.vhdr"
+  ],
+  "resolved_paths": {
+    "audit_json": "D:\\code\\EEG_language_decoding\\reports\\data_audit.json",
+    "chineseeeg1_eeg_root": "D:\\dataset\\ChineseEEG\\derivatives\\preproc\\filtered_0.5_30",
+    "chineseeeg1_novel_root": "D:\\dataset\\ChineseEEG\\derivatives\\novels",
+    "chineseeeg2_audio_root": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio",
+    "chineseeeg2_material_root": "D:\\dataset\\ChineseEEG-2\\materials&embeddings",
+    "chineseeeg2_pl_root": "D:\\dataset\\ChineseEEG-2\\PassiveListening\\derivatives\\preprocessed",
+    "chineseeeg2_ra_root": "D:\\dataset\\ChineseEEG-2\\ReadingAloud\\derivatives\\preprocessed"
+  },
+  "row_count": 168156,
+  "split_group_count": 16679,
+  "split_seed": 20260730,
+  "unparsed_headers": []
+}

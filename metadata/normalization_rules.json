@@ -1,0 +1,28 @@
+{
+  "alignment_version": "monotonic-text-alignment-v1",
+  "char_count": "unicode-codepoints-excluding-whitespace-v1",
+  "hash_algorithm": "sha256-utf8-v1",
+  "highlight_char_count": "Unicode codepoints excluding categories P, Z and C; corresponds to the fixed visual highlight clock, not word count",
+  "normalization_version": "text-normalization-v2",
+  "preserved_distinctions": [
+    "simplified versus traditional Chinese",
+    "digits",
+    "English letter case",
+    "repeated punctuation",
+    "lexical characters"
+  ],
+  "raw_char_count": "unicode-codepoints-v1",
+  "raw_text_policy": "preserve exact source-cell string; never silently edit",
+  "rules_in_order": [
+    "newline_style_to_lf",
+    "remove explicitly enumerated invisible format characters",
+    "Unicode NFC (not NFKC)",
+    "fullwidth ASCII and ideographic space to ASCII equivalents",
+    "explicit quote/book-title/presentation-form punctuation variants",
+    "remove linebreaks",
+    "remove remaining Unicode whitespace"
+  ],
+  "simplified_traditional_policy": "no conversion; a future matching alias must be separate and versioned",
+  "text_hash_basis": "normalized_text",
+  "word_count_method": "jieba-0.42.1-precise-hmm_false-default_dict_sha256_7197c3211ddd9896-exclude_punct_space-v1"
+}

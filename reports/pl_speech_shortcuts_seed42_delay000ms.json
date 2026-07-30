@@ -1,0 +1,130 @@
+{
+  "audio_envelope_definition": {
+    "audio": "mono RMS amplitude envelope, temporal smoothing",
+    "eeg": "per-channel z-score, global field power, temporal smoothing",
+    "learned_mapping": false,
+    "smoothing_ms": 50.0
+  },
+  "baselines": {
+    "audio_envelope": {
+      "global": {
+        "mean_reciprocal_rank": 0.06178814744773934,
+        "median_rank": 36.0,
+        "recall_at_1": 0.010169491525423728,
+        "recall_at_10": 0.12203389830508475,
+        "recall_at_5": 0.06440677966101695
+      },
+      "position_local": {
+        "mean_reciprocal_rank": 0.17532105724935182,
+        "median_rank": 10.0,
+        "recall_at_1": 0.03728813559322034,
+        "recall_at_10": 0.5186440677966102,
+        "recall_at_5": 0.2745762711864407
+      }
+    },
+    "character_count_only": {
+      "global": {
+        "mean_reciprocal_rank": 0.10587570621468934,
+        "median_rank": 12.0,
+        "recall_at_1": 0.0,
+        "recall_at_10": 0.4271186440677966,
+        "recall_at_5": 0.08135593220338982
+      },
+      "position_local": {
+        "mean_reciprocal_rank": 0.27883239171374774,
+        "median_rank": 4.0,
+        "recall_at_1": 0.0,
+        "recall_at_10": 1.0,
+        "recall_at_5": 0.6779661016949152
+      }
+    },
+    "duration_only": {
+      "global": {
+        "mean_reciprocal_rank": 0.013157894736842058,
+        "median_rank": 76.0,
+        "recall_at_1": 0.0,
+        "recall_at_10": 0.0,
+        "recall_at_5": 0.0
+      },
+      "position_local": {
+        "mean_reciprocal_rank": 0.05000000000000025,
+        "median_rank": 20.0,
+        "recall_at_1": 0.0,
+        "recall_at_10": 0.0,
+        "recall_at_5": 0.0
+      }
+    },
+    "padding_mask_only": {
+      "global": {
+        "mean_reciprocal_rank": 0.013157894736842058,
+        "median_rank": 76.0,
+        "recall_at_1": 0.0,
+        "recall_at_10": 0.0,
+        "recall_at_5": 0.0
+      },
+      "position_local": {
+        "mean_reciprocal_rank": 0.05000000000000025,
+        "median_rank": 20.0,
+        "recall_at_1": 0.0,
+        "recall_at_10": 0.0,
+        "recall_at_5": 0.0
+      }
+    },
+    "random": {
+      "global": {
+        "mean_reciprocal_rank": 0.06555083862781919,
+        "median_rank": 36.0,
+        "recall_at_1": 0.013559322033898305,
+        "recall_at_10": 0.15593220338983052,
+        "recall_at_5": 0.07796610169491526
+      },
+      "position_local": {
+        "mean_reciprocal_rank": 0.18420009286160874,
+        "median_rank": 10.0,
+        "recall_at_1": 0.04745762711864407,
+        "recall_at_10": 0.5254237288135594,
+        "recall_at_5": 0.29491525423728815
+      }
+    },
+    "sentence_position_only": {
+      "global": {
+        "mean_reciprocal_rank": 0.4528248587570622,
+        "median_rank": 2.0,
+        "recall_at_1": 0.03389830508474576,
+        "recall_at_10": 1.0,
+        "recall_at_5": 0.9220338983050848
+      },
+      "position_local": {
+        "mean_reciprocal_rank": 0.4528248587570622,
+        "median_rank": 2.0,
+        "recall_at_1": 0.03389830508474576,
+        "recall_at_10": 1.0,
+        "recall_at_5": 0.9220338983050848
+      }
+    },
+    "subject_id_only": {
+      "global": {
+        "mean_reciprocal_rank": 0.026315789473684115,
+        "median_rank": 38.0,
+        "recall_at_1": 0.0,
+        "recall_at_10": 0.0,
+        "recall_at_5": 0.0
+      },
+      "position_local": {
+        "mean_reciprocal_rank": 0.09998972778633845,
+        "median_rank": 10.0,
+        "recall_at_1": 0.0,
+        "recall_at_10": 0.9864406779661017,
+        "recall_at_5": 0.0
+      }
+    }
+  },
+  "candidate_count": 76,
+  "partition": "test",
+  "position_local_pool_size": 20,
+  "query_count": 295,
+  "schema_version": "pl-shortcut-report-v1",
+  "subject_id_only_definition": "known PL subject-to-speaker cohort mapping; candidates scored by speaker",
+  "tie_policy": "pessimistic",
+  "window_jsonl": "metadata/pl_speech_windows_seed42_3s_delay_000ms.jsonl"
+}

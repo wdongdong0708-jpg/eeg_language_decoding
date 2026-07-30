@@ -17,6 +17,7 @@ from features.model_loading import resolve_model_source
 OFFICIAL_AUDIO_MODEL = "airesearch/wav2vec2-large-xlsr-53-th"
 OFFICIAL_AUDIO_POOLING = "last_hidden_state.mean(dim=1)"
 MODEL_SAMPLE_RATE_HZ = 16_000
+DEFAULT_AUDIO_LAYERS = (14, 15, 16, 17, 18)
 
 
 @dataclass(frozen=True, slots=True)
@@ -31,7 +32,7 @@ class AudioFeatureInput:
     def validate(self) -> None:
         if not self.block_id or not self.content_id or not self.split:
             raise ValueError("block_id, content_id and inherited split are required")
-        if self.split not in VALID_SPLITS:
+        if self.split not in VALID_SPLITS | {"validation"}:
             raise ValueError(f"Unknown inherited split: {self.split!r}")
         if self.start_sec < 0 or self.stop_sec <= self.start_sec:
             raise ValueError("Audio block boundaries must be positive and ordered")
@@ -42,11 +43,14 @@ class AudioFeatureConfig:
     model_id: str = OFFICIAL_AUDIO_MODEL
     target_sample_rate_hz: int = MODEL_SAMPLE_RATE_HZ
     layer_index: int = -1
+    layer_indices: tuple[int, ...] = DEFAULT_AUDIO_LAYERS
     output_dtype: str = "float32"
 
     def validate(self) -> None:
         if self.target_sample_rate_hz <= 0:
             raise ValueError("target_sample_rate_hz must be positive")
+        if len(set(self.layer_indices)) != len(self.layer_indices):
+            raise ValueError("layer_indices cannot contain duplicates")
         np.dtype(self.output_dtype)
 
 
@@ -58,6 +62,7 @@ class AudioFrameFeatureResult:
     audio_path: str
     model_id: str
     layer_index: int
+    layer_indices: tuple[int, ...]
     source_sample_rate_hz: int
     model_sample_rate_hz: int
     source_start_sample: int
@@ -180,6 +185,7 @@ def assemble_audio_frame_features(
         audio_path=item.audio_path,
         model_id=config.model_id,
         layer_index=config.layer_index,
+        layer_indices=config.layer_indices,
         source_sample_rate_hz=source_sample_rate_hz,
         model_sample_rate_hz=config.target_sample_rate_hz,
         source_start_sample=source_start_sample,
@@ -257,13 +263,13 @@ class Wav2VecFrameExtractor:
             config.model_id,
             local_files_only=local_files_only,
         )
-        from transformers import AutoModel, AutoProcessor
+        from transformers import AutoProcessor, Wav2Vec2Model
 
         processor = AutoProcessor.from_pretrained(
             model_source,
             local_files_only=local_files_only,
         )
-        model = AutoModel.from_pretrained(
+        model = Wav2Vec2Model.from_pretrained(
             model_source,
             local_files_only=local_files_only,
         )
@@ -301,17 +307,25 @@ class Wav2VecFrameExtractor:
             name: tensor.to(self.device) if self.device else tensor
             for name, tensor in processed.items()
         }
-        needs_all_layers = self.config.layer_index != -1
+        needs_all_layers = bool(self.config.layer_indices) or (
+            self.config.layer_index != -1
+        )
         with torch.inference_mode():
             outputs = self.model(
                 **model_inputs,
                 output_hidden_states=needs_all_layers,
             )
-        hidden = (
-            outputs.last_hidden_state
-            if self.config.layer_index == -1
-            else outputs.hidden_states[self.config.layer_index]
-        )
+        if self.config.layer_indices:
+            hidden = average_hidden_layers(
+                outputs.hidden_states,
+                self.config.layer_indices,
+            )
+        else:
+            hidden = (
+                outputs.last_hidden_state
+                if self.config.layer_index == -1
+                else outputs.hidden_states[self.config.layer_index]
+            )
         hidden_np = hidden[0].detach().cpu().numpy()
         kernels = tuple(int(value) for value in self.model.config.conv_kernel)
         strides = tuple(int(value) for value in self.model.config.conv_stride)
@@ -339,6 +353,7 @@ def save_audio_frame_features(
         "audio_path": result.audio_path,
         "model_id": result.model_id,
         "layer_index": result.layer_index,
+        "layer_indices": list(result.layer_indices),
         "source_sample_rate_hz": result.source_sample_rate_hz,
         "model_sample_rate_hz": result.model_sample_rate_hz,
         "source_start_sample": result.source_start_sample,
@@ -379,6 +394,9 @@ def load_audio_frame_features(path: str | Path) -> AudioFrameFeatureResult:
             audio_path=metadata["audio_path"],
             model_id=metadata["model_id"],
             layer_index=int(metadata["layer_index"]),
+            layer_indices=tuple(
+                int(value) for value in metadata.get("layer_indices", ())
+            ),
             source_sample_rate_hz=int(metadata["source_sample_rate_hz"]),
             model_sample_rate_hz=int(metadata["model_sample_rate_hz"]),
             source_start_sample=int(metadata["source_start_sample"]),
@@ -414,3 +432,125 @@ def mean_pool_audio_frames(
     if not selected.any():
         raise ValueError("No wav2vec frames overlap the requested span")
     return result.frame_hidden_states[selected].mean(axis=0)
+
+
+def average_hidden_layers(
+    hidden_states: Sequence[object],
+    layer_indices: Sequence[int],
+) -> object:
+    """Average selected transformer layers while preserving frame time."""
+
+    import torch
+
+    if not layer_indices:
+        raise ValueError("layer_indices cannot be empty")
+    layer_count = len(hidden_states)
+    resolved = [
+        index if index >= 0 else layer_count + index for index in layer_indices
+    ]
+    if any(index < 0 or index >= layer_count for index in resolved):
+        raise IndexError(
+            f"Requested layers {tuple(layer_indices)} for {layer_count} hidden states"
+        )
+    selected = [hidden_states[index] for index in resolved]
+    if not all(isinstance(value, torch.Tensor) for value in selected):
+        raise TypeError("hidden_states must contain torch.Tensor values")
+    return torch.stack(selected, dim=0).mean(dim=0)
+
+
+def interpolate_audio_sequence(
+    frame_hidden_states: np.ndarray,
+    *,
+    target_time_steps: int,
+    output_dtype: str = "float32",
+) -> np.ndarray:
+    """Convert ``[frames, hidden]`` to unpooled ``[hidden, target_time]``."""
+
+    import torch
+    import torch.nn.functional as functional
+
+    hidden = np.asarray(frame_hidden_states)
+    if hidden.ndim != 2 or hidden.shape[0] < 1 or hidden.shape[1] < 1:
+        raise ValueError("frame_hidden_states must have shape [frames, hidden]")
+    if target_time_steps < 1:
+        raise ValueError("target_time_steps must be positive")
+    outputs = torch.from_numpy(hidden).transpose(0, 1)
+    interpolated = functional.interpolate(
+        outputs[None],
+        size=target_time_steps,
+        mode="linear",
+        align_corners=False,
+    )[0]
+    return interpolated.cpu().numpy().astype(output_dtype, copy=False)
+
+
+def save_audio_sequence_features(
+    path: str | Path,
+    *,
+    audio_target_id: str,
+    result: AudioFrameFeatureResult,
+    target_time_steps: int,
+) -> None:
+    """Save an interpolated sequence target with no temporal pooling."""
+
+    sequence = interpolate_audio_sequence(
+        result.frame_hidden_states,
+        target_time_steps=target_time_steps,
+        output_dtype="float32",
+    )
+    metadata = {
+        "schema_version": "pl-audio-sequence-v1",
+        "audio_target_id": audio_target_id,
+        "block_id": result.block_id,
+        "content_id": result.content_id,
+        "split": result.split,
+        "audio_path": result.audio_path,
+        "model_id": result.model_id,
+        "layer_index": result.layer_index,
+        "layer_indices": list(result.layer_indices),
+        "source_sample_rate_hz": result.source_sample_rate_hz,
+        "model_sample_rate_hz": result.model_sample_rate_hz,
+        "source_start_sec": result.source_start_sec,
+        "source_stop_sec": result.source_stop_sec,
+        "target_time_steps": target_time_steps,
+        "feature_shape": list(sequence.shape),
+        "temporal_pooling": False,
+        "layer_pooling": "arithmetic_mean",
+        "interpolation": "linear_align_corners_false",
+    }
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    handle = tempfile.NamedTemporaryFile(
+        dir=target.parent,
+        prefix=target.stem + ".",
+        suffix=".npz",
+        delete=False,
+    )
+    temporary = Path(handle.name)
+    handle.close()
+    try:
+        np.savez_compressed(
+            temporary,
+            metadata_json=np.asarray(json.dumps(metadata, ensure_ascii=False)),
+            sequence_features=sequence,
+        )
+        os.replace(temporary, target)
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def load_audio_sequence_features(
+    path: str | Path,
+) -> tuple[dict[str, object], np.ndarray]:
+    with np.load(path, allow_pickle=False) as archive:
+        metadata = json.loads(str(archive["metadata_json"]))
+        features = np.asarray(archive["sequence_features"], dtype=np.float32)
+    if metadata.get("schema_version") != "pl-audio-sequence-v1":
+        raise ValueError(f"Unknown audio sequence schema in {path}")
+    if features.ndim != 2:
+        raise ValueError("sequence_features must have shape [hidden, time]")
+    if list(features.shape) != metadata["feature_shape"]:
+        raise ValueError("Stored audio sequence shape does not match metadata")
+    if features.shape[1] != int(metadata["target_time_steps"]):
+        raise ValueError("Stored audio sequence time length is inconsistent")
+    return metadata, features

@@ -29,12 +29,15 @@ class StimulusTextUnit:
     m1_boundary_label: str | None = None
 
 
-def _as_text(value: object) -> str:
+def _as_text(value: object, *, strip: bool = False) -> str:
+    """Convert a cell value without silently editing source text."""
+
     if value is None:
         return ""
     if isinstance(value, float) and value.is_integer():
         return str(int(value))
-    return str(value).strip()
+    result = str(value)
+    return result.strip() if strip else result
 
 
 def parse_chineseeeg2_rows(
@@ -58,7 +61,7 @@ def parse_chineseeeg2_rows(
         (row for row in material_rows if row.excel_row == first_chapter_excel_row),
         None,
     )
-    if first_chapter is None or _as_text(first_chapter.values[0]) != "1":
+    if first_chapter is None or _as_text(first_chapter.values[0], strip=True) != "1":
         raise ValueError(
             f"Expected chapter marker 1 at Excel row {first_chapter_excel_row}"
         )
@@ -71,17 +74,22 @@ def parse_chineseeeg2_rows(
         if row.excel_row == 1:
             continue
         text = _as_text(row.values[0] if row.values else None)
-        if not text:
+        if not text.strip():
             continue
-        is_marker = bool(_CHAPTER_MARKER.fullmatch(text))
+        marker_text = text.strip()
+        is_marker = bool(_CHAPTER_MARKER.fullmatch(marker_text))
         if is_marker:
-            chapter_id = int(text)
+            chapter_id = int(marker_text)
             row_in_chapter = 0
         else:
             row_in_chapter += 1
 
-        f1_label = _as_text(row.values[4]) if len(row.values) > 4 else ""
-        m1_label = _as_text(row.values[5]) if len(row.values) > 5 else ""
+        f1_label = (
+            _as_text(row.values[4], strip=True) if len(row.values) > 4 else ""
+        )
+        m1_label = (
+            _as_text(row.values[5], strip=True) if len(row.values) > 5 else ""
+        )
         segment_role = "marker" if is_marker else f"row{row_in_chapter:04d}"
         segment_id = (
             f"{dataset_id}:{normalized_book}:ch{chapter_id:02d}:{segment_role}"
@@ -118,4 +126,3 @@ def load_chineseeeg2_workbook(
         book_id=book_id,
         first_chapter_excel_row=first_chapter_excel_row,
     )
-

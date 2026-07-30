@@ -1,0 +1,130 @@
+{
+  "common_support_artifacts": {
+    "0.0": {
+      "audio_target_count": 312,
+      "content_group_count": 156,
+      "partition_counts": {
+        "test": 150,
+        "train": 965,
+        "validation": 102
+      },
+      "path": "experiments/pl_delay_sweep/windows_delay_000ms_common.jsonl",
+      "sha256": "7f0b17c29b98d373087e719f09a36c88600015ef432c43068336fdae545aa23e",
+      "window_count": 1217
+    },
+    "100.0": {
+      "audio_target_count": 312,
+      "content_group_count": 156,
+      "partition_counts": {
+        "test": 150,
+        "train": 965,
+        "validation": 102
+      },
+      "path": "experiments/pl_delay_sweep/windows_delay_100ms_common.jsonl",
+      "sha256": "7165126567ac1ddc2e6e5249a9ceb42c391c3481dfc908679cb63396ea98f23c",
+      "window_count": 1217
+    },
+    "200.0": {
+      "audio_target_count": 312,
+      "content_group_count": 156,
+      "partition_counts": {
+        "test": 150,
+        "train": 965,
+        "validation": 102
+      },
+      "path": "experiments/pl_delay_sweep/windows_delay_200ms_common.jsonl",
+      "sha256": "99ffcf2f3667dce61cb00341297e3b8dc64f1687929cbc2aead7ffa8d48a0ae2",
+      "window_count": 1217
+    },
+    "300.0": {
+      "audio_target_count": 312,
+      "content_group_count": 156,
+      "partition_counts": {
+        "test": 150,
+        "train": 965,
+        "validation": 102
+      },
+      "path": "experiments/pl_delay_sweep/windows_delay_300ms_common.jsonl",
+      "sha256": "db715d0cdbfc3d4508cbe2e0fbf0f9ca8a842d1bab268e1d93be2f24b9854add",
+      "window_count": 1217
+    },
+    "400.0": {
+      "audio_target_count": 312,
+      "content_group_count": 156,
+      "partition_counts": {
+        "test": 150,
+        "train": 965,
+        "validation": 102
+      },
+      "path": "experiments/pl_delay_sweep/windows_delay_400ms_common.jsonl",
+      "sha256": "e49db4c1e7aaed0d34a94510e91057c135b9b66bad5dc40aacd2d6f1e9098f6f",
+      "window_count": 1217
+    },
+    "500.0": {
+      "audio_target_count": 312,
+      "content_group_count": 156,
+      "partition_counts": {
+        "test": 150,
+        "train": 965,
+        "validation": 102
+      },
+      "path": "experiments/pl_delay_sweep/windows_delay_500ms_common.jsonl",
+      "sha256": "47c16124c2130048c74cbd7a7568faa791b31f703675309ed4aa1134cf73324c",
+      "window_count": 1217
+    }
+  },
+  "common_support_window_count": 1217,
+  "config": "configs/experiment/pl_speech_retrieval.yaml",
+  "delays_ms": [
+    0.0,
+    100.0,
+    200.0,
+    300.0,
+    400.0,
+    500.0
+  ],
+  "raw_exclusion_counts": {
+    "0.0": {
+      "audio_bounds_exceed_file": 179,
+      "shorter_than_window_after_delay": 18924,
+      "unverified_or_missing_audio_alignment": 18522
+    },
+    "100.0": {
+      "audio_bounds_exceed_file": 179,
+      "shorter_than_window_after_delay": 18943,
+      "unverified_or_missing_audio_alignment": 18522
+    },
+    "200.0": {
+      "audio_bounds_exceed_file": 179,
+      "shorter_than_window_after_delay": 19020,
+      "unverified_or_missing_audio_alignment": 18522
+    },
+    "300.0": {
+      "audio_bounds_exceed_file": 179,
+      "shorter_than_window_after_delay": 19779,
+      "unverified_or_missing_audio_alignment": 18522
+    },
+    "400.0": {
+      "audio_bounds_exceed_file": 179,
+      "shorter_than_window_after_delay": 19790,
+      "unverified_or_missing_audio_alignment": 18522
+    },
+    "500.0": {
+      "audio_bounds_exceed_file": 179,
+      "shorter_than_window_after_delay": 20384,
+      "unverified_or_missing_audio_alignment": 18522
+    }
+  },
+  "raw_window_counts": {
+    "0.0": 2677,
+    "100.0": 2658,
+    "200.0": 2581,
+    "300.0": 1822,
+    "400.0": 1811,
+    "500.0": 1217
+  },
+  "schema_version": "pl-delay-common-support-v1",
+  "scientific_reason": "Every delay is trained and validated on identical record/audio/window units; otherwise longer delays would be compared on a shorter, biased eligibility subset.",
+  "selection_partition": "validation",
+  "test_evaluated_during_delay_selection": false
+}

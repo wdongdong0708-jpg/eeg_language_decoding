@@ -1,0 +1,876 @@
+{
+  "artifact_sha256": {
+    "cross_paradigm_seed42.json": "6eb0fa7a4effa2cf6118f1f1a65329698c603ac138772079550408e4b84084fe",
+    "subject_text_unseen_seed42.json": "acd0168be9d17a1a3cd0669ee26eeb28f698fd0a72d2a43b54f7edba7b840155",
+    "text_unseen_seed42.json": "f871511c49ac97a7911b88d9ac25084a8d6763ff659e1782840502769fe78b95"
+  },
+  "manifest_critical_field_fingerprint": {
+    "algorithm": "sha256",
+    "fields": [
+      "record_id",
+      "sentence_id",
+      "global_text_id",
+      "normalized_text_hash",
+      "split_group_id",
+      "split",
+      "eeg_start_sample",
+      "eeg_end_sample"
+    ],
+    "row_order": "physical manifest row order",
+    "row_separator_hex": "0a",
+    "sha256": "7b0f92220c00e28648632e9b418a6cd5bd88b7ad832532f25ff0e35512778e0d",
+    "value_separator_hex": "1f"
+  },
+  "manifest_path": "metadata/all_trials.parquet",
+  "manifest_row_count": 168156,
+  "protocol_version": "split-protocol-v1",
+  "reproducibility_contract": {
+    "expected_rebuild_behavior": "Same manifest bytes, seed, schema and implementation produce identical artifact SHA-256.",
+    "identifier_lists_sorted": true,
+    "json_keys_sorted": true,
+    "manifest_embedded_split_overwritten": false,
+    "wall_clock_fields_absent": true
+  },
+  "scientific_policy": {
+    "fuzzy_global_alignment": "Retained in Settings A/B accounting and assignment; whole implicated content groups excluded from Setting C strict main protocols.",
+    "implausible_eeg_trial_duration": "Retained everywhere unless excluded by a protocol cell/mask unrelated to duration; never used to assign a partition.",
+    "material_variant_uncertain": "Retained in Settings A/B accounting and assignment; whole implicated content groups excluded from Setting C strict main protocols.",
+    "missing_text": "Retained in Settings A/B accounting and assignment; whole implicated content groups excluded from Setting C strict main protocols.",
+    "quality_filtering": "None. Protocol construction is independent of quality_flag.",
+    "unresolved_global_alignment": "Retained. Zero-shot transfer does not require paired source/target trials; unresolved cross-dataset variants remain a scientific risk."
+  },
+  "seed": 42,
+  "setting_a": {
+    "actual_ratios": {
+      "all_content_groups": {
+        "test": 0.10096528568859044,
+        "train": 0.8022663229210384,
+        "validation": 0.09676839139037112
+      },
+      "selected_trial_distribution": {
+        "test": 0.10040676514664953,
+        "train": 0.8019874402340683,
+        "validation": 0.0976057946192821
+      },
+      "selected_trials_over_manifest": {
+        "test": 0.10040676514664953,
+        "train": 0.8019874402340683,
+        "validation": 0.0976057946192821
+      }
+    },
+    "counts": {
+      "all_content_assignment_group_counts": {
+        "test": 1684,
+        "train": 13381,
+        "validation": 1614
+      },
+      "all_content_group_count": 16679,
+      "all_subject_group_count": 22,
+      "content_group_counts_in_selected": {
+        "test": 1684,
+        "train": 13381,
+        "validation": 1614
+      },
+      "excluded_trial_count": 0,
+      "manifest_trial_count": 168156,
+      "selected_trial_count": 168156,
+      "subject_group_counts_in_selected": {
+        "test": 22,
+        "train": 22,
+        "validation": 22
+      },
+      "trial_counts": {
+        "test": 16884,
+        "train": 134859,
+        "validation": 16413
+      }
+    },
+    "excluded_reason_counts": {},
+    "leakage_checks": {
+      "all_partition_split_group_intersection_count": 0,
+      "duplicate_excluded_record_id_count": 0,
+      "duplicate_selected_record_id_count": 0,
+      "selected_excluded_record_id_intersection_count": 0,
+      "selected_plus_excluded_equals_manifest": true,
+      "train_test_split_group_intersection_count": 0,
+      "train_test_subject_group_intersection_count": 22,
+      "train_test_subject_overlap_allowed": true
+    },
+    "quality_accounting": {
+      "excluded": {
+        "fuzzy_global_alignment_trial_count": 0,
+        "implausible_eeg_trial_duration_trial_count": 0,
+        "material_variant_uncertain_trial_count": 0,
+        "missing_text_trial_count": 0,
+        "quality_flag_trial_counts": {},
+        "trial_count": 0,
+        "unresolved_global_alignment_trial_count": 0
+      },
+      "policy": "quality-independent protocol construction; no quality_flag filtering",
+      "selected": {
+        "test": {
+          "fuzzy_global_alignment_trial_count": 8,
+          "implausible_eeg_trial_duration_trial_count": 0,
+          "material_variant_uncertain_trial_count": 0,
+          "missing_text_trial_count": 0,
+          "quality_flag_trial_counts": {
+            "broken_brainvision_reference": 8612,
+            "event_text_count_mismatch": 499,
+            "events_vmrk_count_mismatch": 6,
+            "ok": 2159,
+            "orphan_row_event_in_recording": 717,
+            "pl_audio_mapping_unverified": 1880,
+            "ra_audio_boundary_unavailable": 2099,
+            "unresolved_text_alignment": 10422
+          },
+          "trial_count": 16884,
+          "unresolved_global_alignment_trial_count": 10422
+        },
+        "train": {
+          "fuzzy_global_alignment_trial_count": 106,
+          "implausible_eeg_trial_duration_trial_count": 7,
+          "material_variant_uncertain_trial_count": 12,
+          "missing_text_trial_count": 28,
+          "quality_flag_trial_counts": {
+            "broken_brainvision_reference": 69174,
+            "event_text_count_mismatch": 3664,
+            "events_vmrk_count_mismatch": 34,
+            "implausible_eeg_trial_duration": 7,
+            "material_variant_uncertain": 12,
+            "missing_text": 28,
+            "ok": 16896,
+            "orphan_row_event_in_recording": 4922,
+            "pl_audio_mapping_unverified": 14898,
+            "prechapter_trial_unresolved": 14,
+            "ra_audio_boundary_unavailable": 16423,
+            "unresolved_text_alignment": 84078
+          },
+          "trial_count": 134859,
+          "unresolved_global_alignment_trial_count": 84078
+        },
+        "validation": {
+          "fuzzy_global_alignment_trial_count": 17,
+          "implausible_eeg_trial_duration_trial_count": 1,
+          "material_variant_uncertain_trial_count": 0,
+          "missing_text_trial_count": 0,
+          "quality_flag_trial_counts": {
+            "broken_brainvision_reference": 8478,
+            "event_text_count_mismatch": 398,
+            "events_vmrk_count_mismatch": 1,
+            "implausible_eeg_trial_duration": 1,
+            "ok": 2045,
+            "orphan_row_event_in_recording": 662,
+            "pl_audio_mapping_unverified": 1744,
+            "ra_audio_boundary_unavailable": 1918,
+            "unresolved_text_alignment": 10414
+          },
+          "trial_count": 16413,
+          "unresolved_global_alignment_trial_count": 10414
+        }
+      }
+    }
+  },
+  "setting_b": {
+    "actual_ratios": {
+      "all_content_groups": {
+        "test": 0.10096528568859044,
+        "train": 0.8022663229210384,
+        "validation": 0.09676839139037112
+      },
+      "selected_trial_distribution": {
+        "test": 0.020197171657497324,
+        "train": 0.9657165011261677,
+        "validation": 0.01408632721633497
+      },
+      "selected_trials_over_manifest": {
+        "test": 0.013011727205689955,
+        "train": 0.6221484811722449,
+        "validation": 0.009074906634315755
+      }
+    },
+    "counts": {
+      "all_content_assignment_group_counts": {
+        "test": 1684,
+        "train": 13381,
+        "validation": 1614
+      },
+      "all_content_group_count": 16679,
+      "all_subject_group_count": 22,
+      "content_group_counts_in_selected": {
+        "test": 1621,
+        "train": 13378,
+        "validation": 991
+      },
+      "excluded_trial_count": 59824,
+      "manifest_trial_count": 168156,
+      "selected_trial_count": 108332,
+      "subject_group_counts_in_selected": {
+        "test": 3,
+        "train": 16,
+        "validation": 3
+      },
+      "trial_counts": {
+        "test": 2188,
+        "train": 104618,
+        "validation": 1526
+      }
+    },
+    "excluded_reason_counts": {
+      "off_diagonal_subject_test__content_train": 17442,
+      "off_diagonal_subject_test__content_validation": 2111,
+      "off_diagonal_subject_train__content_test": 13078,
+      "off_diagonal_subject_train__content_validation": 12776,
+      "off_diagonal_subject_validation__content_test": 1618,
+      "off_diagonal_subject_validation__content_train": 12799
+    },
+    "leakage_checks": {
+      "all_partition_split_group_intersection_count": 0,
+      "duplicate_excluded_record_id_count": 0,
+      "duplicate_selected_record_id_count": 0,
+      "selected_excluded_record_id_intersection_count": 0,
+      "selected_plus_excluded_equals_manifest": true,
+      "train_test_split_group_intersection_count": 0,
+      "train_test_subject_group_intersection_count": 0
+    },
+    "off_diagonal_exclusion_counts": {
+      "off_diagonal_subject_test__content_train": 17442,
+      "off_diagonal_subject_test__content_validation": 2111,
+      "off_diagonal_subject_train__content_test": 13078,
+      "off_diagonal_subject_train__content_validation": 12776,
+      "off_diagonal_subject_validation__content_test": 1618,
+      "off_diagonal_subject_validation__content_train": 12799
+    },
+    "quality_accounting": {
+      "excluded": {
+        "fuzzy_global_alignment_trial_count": 37,
+        "implausible_eeg_trial_duration_trial_count": 5,
+        "material_variant_uncertain_trial_count": 5,
+        "missing_text_trial_count": 9,
+        "quality_flag_trial_counts": {
+          "broken_brainvision_reference": 27237,
+          "event_text_count_mismatch": 1905,
+          "events_vmrk_count_mismatch": 7,
+          "implausible_eeg_trial_duration": 5,
+          "material_variant_uncertain": 5,
+          "missing_text": 9,
+          "ok": 7950,
+          "orphan_row_event_in_recording": 2311,
+          "pl_audio_mapping_unverified": 6897,
+          "prechapter_trial_unresolved": 2,
+          "ra_audio_boundary_unavailable": 11442,
+          "unresolved_text_alignment": 32479
+        },
+        "trial_count": 59824,
+        "unresolved_global_alignment_trial_count": 32479
+      },
+      "policy": "quality-independent protocol construction; no quality_flag filtering",
+      "selected": {
+        "test": {
+          "fuzzy_global_alignment_trial_count": 1,
+          "implausible_eeg_trial_duration_trial_count": 0,
+          "material_variant_uncertain_trial_count": 0,
+          "missing_text_trial_count": 0,
+          "quality_flag_trial_counts": {
+            "broken_brainvision_reference": 899,
+            "event_text_count_mismatch": 67,
+            "ok": 283,
+            "orphan_row_event_in_recording": 88,
+            "pl_audio_mapping_unverified": 216,
+            "ra_audio_boundary_unavailable": 545,
+            "unresolved_text_alignment": 1111
+          },
+          "trial_count": 2188,
+          "unresolved_global_alignment_trial_count": 1111
+        },
+        "train": {
+          "fuzzy_global_alignment_trial_count": 93,
+          "implausible_eeg_trial_duration_trial_count": 3,
+          "material_variant_uncertain_trial_count": 7,
+          "missing_text_trial_count": 19,
+          "quality_flag_trial_counts": {
+            "broken_brainvision_reference": 57594,
+            "event_text_count_mismatch": 2517,
+            "events_vmrk_count_mismatch": 34,
+            "implausible_eeg_trial_duration": 3,
+            "material_variant_uncertain": 7,
+            "missing_text": 19,
+            "ok": 12616,
+            "orphan_row_event_in_recording": 3846,
+            "pl_audio_mapping_unverified": 11173,
+            "prechapter_trial_unresolved": 12,
+            "ra_audio_boundary_unavailable": 7961,
+            "unresolved_text_alignment": 70794
+          },
+          "trial_count": 104618,
+          "unresolved_global_alignment_trial_count": 70794
+        },
+        "validation": {
+          "fuzzy_global_alignment_trial_count": 0,
+          "implausible_eeg_trial_duration_trial_count": 0,
+          "material_variant_uncertain_trial_count": 0,
+          "missing_text_trial_count": 0,
+          "quality_flag_trial_counts": {
+            "broken_brainvision_reference": 534,
+            "event_text_count_mismatch": 72,
+            "ok": 251,
+            "orphan_row_event_in_recording": 56,
+            "pl_audio_mapping_unverified": 236,
+            "ra_audio_boundary_unavailable": 492,
+            "unresolved_text_alignment": 530
+          },
+          "trial_count": 1526,
+          "unresolved_global_alignment_trial_count": 530
+        }
+      }
+    },
+    "subject_cohorts": [
+      {
+        "actual_ratios": {
+          "test": 0.1,
+          "train": 0.8,
+          "validation": 0.1
+        },
+        "assigned_counts": {
+          "test": 1,
+          "train": 8,
+          "validation": 1
+        },
+        "cohort": "ChineseEEG1::silent_reading",
+        "ratio_deviation": {
+          "test": 0.0,
+          "train": 0.0,
+          "validation": 0.0
+        },
+        "requested_ratios": {
+          "test": 0.1,
+          "train": 0.8,
+          "validation": 0.1
+        },
+        "subject_group_count": 10
+      },
+      {
+        "actual_ratios": {
+          "test": 0.125,
+          "train": 0.75,
+          "validation": 0.125
+        },
+        "assigned_counts": {
+          "test": 1,
+          "train": 6,
+          "validation": 1
+        },
+        "cohort": "ChineseEEG2::passive_listening",
+        "ratio_deviation": {
+          "test": 0.024999999999999994,
+          "train": -0.050000000000000044,
+          "validation": 0.024999999999999994
+        },
+        "requested_ratios": {
+          "test": 0.1,
+          "train": 0.8,
+          "validation": 0.1
+        },
+        "subject_group_count": 8
+      },
+      {
+        "actual_ratios": {
+          "test": 0.25,
+          "train": 0.5,
+          "validation": 0.25
+        },
+        "assigned_counts": {
+          "test": 1,
+          "train": 2,
+          "validation": 1
+        },
+        "cohort": "ChineseEEG2::reading_aloud",
+        "ratio_deviation": {
+          "test": 0.15,
+          "train": -0.30000000000000004,
+          "validation": 0.15
+        },
+        "requested_ratios": {
+          "test": 0.1,
+          "train": 0.8,
+          "validation": 0.1
+        },
+        "subject_group_count": 4
+      }
+    ]
+  },
+  "setting_c": {
+    "protocols": {
+      "pl_silent_reading_to_ra_unseen_text": {
+        "actual_ratios": {
+          "all_content_groups": {
+            "test": 0.10096528568859044,
+            "train": 0.8022663229210384,
+            "validation": 0.09676839139037112
+          },
+          "selected_trial_distribution": {
+            "test": 0.01554384923579166,
+            "train": 0.8771553642973735,
+            "validation": 0.10730078646683484
+          },
+          "selected_trials_over_manifest": {
+            "test": 0.012458669330859441,
+            "train": 0.7030554960869668,
+            "validation": 0.08600347296557959
+          }
+        },
+        "counts": {
+          "all_content_assignment_group_counts": {
+            "test": 1684,
+            "train": 13381,
+            "validation": 1614
+          },
+          "all_content_group_count": 16679,
+          "all_subject_group_count": 22,
+          "content_group_counts_in_selected": {
+            "test": 518,
+            "train": 13362,
+            "validation": 1612
+          },
+          "excluded_trial_count": 33376,
+          "manifest_trial_count": 168156,
+          "selected_trial_count": 134780,
+          "subject_group_counts_in_selected": {
+            "test": 4,
+            "train": 18,
+            "validation": 18
+          },
+          "trial_counts": {
+            "test": 2095,
+            "train": 118223,
+            "validation": 14462
+          }
+        },
+        "excluded_reason_counts": {
+          "fuzzy_global_alignment_group_excluded_from_strict_main": 300,
+          "missing_text_group_excluded_from_strict_main": 28,
+          "source_paradigm_test_content_excluded": 14769,
+          "target_paradigm_non_test_content_excluded": 18279
+        },
+        "leakage_checks": {
+          "all_partition_split_group_intersection_count": 0,
+          "duplicate_excluded_record_id_count": 0,
+          "duplicate_selected_record_id_count": 0,
+          "selected_excluded_record_id_intersection_count": 0,
+          "selected_plus_excluded_equals_manifest": true,
+          "target_paradigm_in_train_or_validation_count": 0,
+          "train_test_split_group_intersection_count": 0,
+          "train_test_subject_group_intersection_count": 0
+        },
+        "quality_accounting": {
+          "excluded": {
+            "fuzzy_global_alignment_trial_count": 131,
+            "implausible_eeg_trial_duration_trial_count": 3,
+            "material_variant_uncertain_trial_count": 12,
+            "missing_text_trial_count": 28,
+            "quality_flag_trial_counts": {
+              "broken_brainvision_reference": 8622,
+              "event_text_count_mismatch": 1561,
+              "events_vmrk_count_mismatch": 6,
+              "implausible_eeg_trial_duration": 3,
+              "material_variant_uncertain": 12,
+              "missing_text": 28,
+              "ok": 2362,
+              "orphan_row_event_in_recording": 1429,
+              "pl_audio_mapping_unverified": 1890,
+              "prechapter_trial_unresolved": 14,
+              "ra_audio_boundary_unavailable": 18345,
+              "unresolved_text_alignment": 10450
+            },
+            "trial_count": 33376,
+            "unresolved_global_alignment_trial_count": 10450
+          },
+          "policy": "quality-independent protocol construction; no quality_flag filtering",
+          "selected": {
+            "test": {
+              "fuzzy_global_alignment_trial_count": 0,
+              "implausible_eeg_trial_duration_trial_count": 0,
+              "material_variant_uncertain_trial_count": 0,
+              "missing_text_trial_count": 0,
+              "quality_flag_trial_counts": {
+                "event_text_count_mismatch": 161,
+                "orphan_row_event_in_recording": 102,
+                "ra_audio_boundary_unavailable": 2095
+              },
+              "trial_count": 2095,
+              "unresolved_global_alignment_trial_count": 0
+            },
+            "train": {
+              "fuzzy_global_alignment_trial_count": 0,
+              "implausible_eeg_trial_duration_trial_count": 4,
+              "material_variant_uncertain_trial_count": 0,
+              "missing_text_trial_count": 0,
+              "quality_flag_trial_counts": {
+                "broken_brainvision_reference": 69164,
+                "event_text_count_mismatch": 2558,
+                "events_vmrk_count_mismatch": 34,
+                "implausible_eeg_trial_duration": 4,
+                "ok": 16724,
+                "orphan_row_event_in_recording": 4201,
+                "pl_audio_mapping_unverified": 14888,
+                "unresolved_text_alignment": 84050
+              },
+              "trial_count": 118223,
+              "unresolved_global_alignment_trial_count": 84050
+            },
+            "validation": {
+              "fuzzy_global_alignment_trial_count": 0,
+              "implausible_eeg_trial_duration_trial_count": 1,
+              "material_variant_uncertain_trial_count": 0,
+              "missing_text_trial_count": 0,
+              "quality_flag_trial_counts": {
+                "broken_brainvision_reference": 8478,
+                "event_text_count_mismatch": 281,
+                "events_vmrk_count_mismatch": 1,
+                "implausible_eeg_trial_duration": 1,
+                "ok": 2014,
+                "orphan_row_event_in_recording": 569,
+                "pl_audio_mapping_unverified": 1744,
+                "unresolved_text_alignment": 10414
+              },
+              "trial_count": 14462,
+              "unresolved_global_alignment_trial_count": 10414
+            }
+          }
+        },
+        "source_paradigms": [
+          "passive_listening",
+          "silent_reading"
+        ],
+        "target_paradigm": "reading_aloud"
+      },
+      "pl_to_silent_reading_unseen_text": {
+        "actual_ratios": {
+          "all_content_groups": {
+            "test": 0.10096528568859044,
+            "train": 0.8022663229210384,
+            "validation": 0.09676839139037112
+          },
+          "selected_trial_distribution": {
+            "test": 0.22785677574096283,
+            "train": 0.6912583518930958,
+            "validation": 0.08088487236594141
+          },
+          "selected_trials_over_manifest": {
+            "test": 0.06327457836770618,
+            "train": 0.1919586574371417,
+            "validation": 0.022461285948761865
+          }
+        },
+        "counts": {
+          "all_content_assignment_group_counts": {
+            "test": 1684,
+            "train": 13381,
+            "validation": 1614
+          },
+          "all_content_group_count": 16679,
+          "all_subject_group_count": 22,
+          "content_group_counts_in_selected": {
+            "test": 1192,
+            "train": 3970,
+            "validation": 466
+          },
+          "excluded_trial_count": 121460,
+          "manifest_trial_count": 168156,
+          "selected_trial_count": 46696,
+          "subject_group_counts_in_selected": {
+            "test": 10,
+            "train": 8,
+            "validation": 8
+          },
+          "trial_counts": {
+            "test": 10640,
+            "train": 32279,
+            "validation": 3777
+          }
+        },
+        "excluded_reason_counts": {
+          "fuzzy_global_alignment_group_excluded_from_strict_main": 300,
+          "missing_text_group_excluded_from_strict_main": 28,
+          "paradigm_out_of_protocol_scope": 20374,
+          "source_paradigm_test_content_excluded": 4129,
+          "target_paradigm_non_test_content_excluded": 96629
+        },
+        "leakage_checks": {
+          "all_partition_split_group_intersection_count": 0,
+          "duplicate_excluded_record_id_count": 0,
+          "duplicate_selected_record_id_count": 0,
+          "selected_excluded_record_id_intersection_count": 0,
+          "selected_plus_excluded_equals_manifest": true,
+          "target_paradigm_in_train_or_validation_count": 0,
+          "train_test_split_group_intersection_count": 0,
+          "train_test_subject_group_intersection_count": 0
+        },
+        "quality_accounting": {
+          "excluded": {
+            "fuzzy_global_alignment_trial_count": 131,
+            "implausible_eeg_trial_duration_trial_count": 3,
+            "material_variant_uncertain_trial_count": 12,
+            "missing_text_trial_count": 28,
+            "quality_flag_trial_counts": {
+              "broken_brainvision_reference": 77652,
+              "event_text_count_mismatch": 1722,
+              "events_vmrk_count_mismatch": 6,
+              "implausible_eeg_trial_duration": 3,
+              "material_variant_uncertain": 12,
+              "missing_text": 28,
+              "ok": 3081,
+              "orphan_row_event_in_recording": 3899,
+              "pl_audio_mapping_unverified": 1890,
+              "prechapter_trial_unresolved": 14,
+              "ra_audio_boundary_unavailable": 20440,
+              "unresolved_text_alignment": 94492
+            },
+            "trial_count": 121460,
+            "unresolved_global_alignment_trial_count": 94492
+          },
+          "policy": "quality-independent protocol construction; no quality_flag filtering",
+          "selected": {
+            "test": {
+              "fuzzy_global_alignment_trial_count": 0,
+              "implausible_eeg_trial_duration_trial_count": 0,
+              "material_variant_uncertain_trial_count": 0,
+              "missing_text_trial_count": 0,
+              "quality_flag_trial_counts": {
+                "broken_brainvision_reference": 8612,
+                "ok": 68,
+                "orphan_row_event_in_recording": 376,
+                "unresolved_text_alignment": 10422
+              },
+              "trial_count": 10640,
+              "unresolved_global_alignment_trial_count": 10422
+            },
+            "train": {
+              "fuzzy_global_alignment_trial_count": 0,
+              "implausible_eeg_trial_duration_trial_count": 4,
+              "material_variant_uncertain_trial_count": 0,
+              "missing_text_trial_count": 0,
+              "quality_flag_trial_counts": {
+                "event_text_count_mismatch": 2558,
+                "events_vmrk_count_mismatch": 34,
+                "implausible_eeg_trial_duration": 4,
+                "ok": 16089,
+                "orphan_row_event_in_recording": 1809,
+                "pl_audio_mapping_unverified": 14888
+              },
+              "trial_count": 32279,
+              "unresolved_global_alignment_trial_count": 0
+            },
+            "validation": {
+              "fuzzy_global_alignment_trial_count": 0,
+              "implausible_eeg_trial_duration_trial_count": 1,
+              "material_variant_uncertain_trial_count": 0,
+              "missing_text_trial_count": 0,
+              "quality_flag_trial_counts": {
+                "event_text_count_mismatch": 281,
+                "events_vmrk_count_mismatch": 1,
+                "implausible_eeg_trial_duration": 1,
+                "ok": 1862,
+                "orphan_row_event_in_recording": 217,
+                "pl_audio_mapping_unverified": 1744
+              },
+              "trial_count": 3777,
+              "unresolved_global_alignment_trial_count": 0
+            }
+          }
+        },
+        "source_paradigms": [
+          "passive_listening"
+        ],
+        "target_paradigm": "silent_reading"
+      },
+      "silent_reading_to_pl_unseen_text": {
+        "actual_ratios": {
+          "all_content_groups": {
+            "test": 0.10096528568859044,
+            "train": 0.8022663229210384,
+            "validation": 0.09676839139037112
+          },
+          "selected_trial_distribution": {
+            "test": 0.04097937632743802,
+            "train": 0.8529744536413982,
+            "validation": 0.10604617003116378
+          },
+          "selected_trials_over_manifest": {
+            "test": 0.024554580270701017,
+            "train": 0.5110968386498251,
+            "validation": 0.06354218701681771
+          }
+        },
+        "counts": {
+          "all_content_assignment_group_counts": {
+            "test": 1684,
+            "train": 13381,
+            "validation": 1614
+          },
+          "all_content_group_count": 16679,
+          "all_subject_group_count": 22,
+          "content_group_counts_in_selected": {
+            "test": 518,
+            "train": 9612,
+            "validation": 1179
+          },
+          "excluded_trial_count": 67398,
+          "manifest_trial_count": 168156,
+          "selected_trial_count": 100758,
+          "subject_group_counts_in_selected": {
+            "test": 8,
+            "train": 10,
+            "validation": 10
+          },
+          "trial_counts": {
+            "test": 4129,
+            "train": 85944,
+            "validation": 10685
+          }
+        },
+        "excluded_reason_counts": {
+          "fuzzy_global_alignment_group_excluded_from_strict_main": 300,
+          "missing_text_group_excluded_from_strict_main": 28,
+          "paradigm_out_of_protocol_scope": 20374,
+          "source_paradigm_test_content_excluded": 10640,
+          "target_paradigm_non_test_content_excluded": 36056
+        },
+        "leakage_checks": {
+          "all_partition_split_group_intersection_count": 0,
+          "duplicate_excluded_record_id_count": 0,
+          "duplicate_selected_record_id_count": 0,
+          "selected_excluded_record_id_intersection_count": 0,
+          "selected_plus_excluded_equals_manifest": true,
+          "target_paradigm_in_train_or_validation_count": 0,
+          "train_test_split_group_intersection_count": 0,
+          "train_test_subject_group_intersection_count": 0
+        },
+        "quality_accounting": {
+          "excluded": {
+            "fuzzy_global_alignment_trial_count": 131,
+            "implausible_eeg_trial_duration_trial_count": 8,
+            "material_variant_uncertain_trial_count": 12,
+            "missing_text_trial_count": 28,
+            "quality_flag_trial_counts": {
+              "broken_brainvision_reference": 8622,
+              "event_text_count_mismatch": 4224,
+              "events_vmrk_count_mismatch": 35,
+              "implausible_eeg_trial_duration": 8,
+              "material_variant_uncertain": 12,
+              "missing_text": 28,
+              "ok": 18229,
+              "orphan_row_event_in_recording": 3328,
+              "pl_audio_mapping_unverified": 16642,
+              "prechapter_trial_unresolved": 14,
+              "ra_audio_boundary_unavailable": 20440,
+              "unresolved_text_alignment": 10450
+            },
+            "trial_count": 67398,
+            "unresolved_global_alignment_trial_count": 10450
+          },
+          "policy": "quality-independent protocol construction; no quality_flag filtering",
+          "selected": {
+            "test": {
+              "fuzzy_global_alignment_trial_count": 0,
+              "implausible_eeg_trial_duration_trial_count": 0,
+              "material_variant_uncertain_trial_count": 0,
+              "missing_text_trial_count": 0,
+              "quality_flag_trial_counts": {
+                "event_text_count_mismatch": 337,
+                "events_vmrk_count_mismatch": 6,
+                "ok": 2084,
+                "orphan_row_event_in_recording": 229,
+                "pl_audio_mapping_unverified": 1880
+              },
+              "trial_count": 4129,
+              "unresolved_global_alignment_trial_count": 0
+            },
+            "train": {
+              "fuzzy_global_alignment_trial_count": 0,
+              "implausible_eeg_trial_duration_trial_count": 0,
+              "material_variant_uncertain_trial_count": 0,
+              "missing_text_trial_count": 0,
+              "quality_flag_trial_counts": {
+                "broken_brainvision_reference": 69164,
+                "ok": 635,
+                "orphan_row_event_in_recording": 2392,
+                "unresolved_text_alignment": 84050
+              },
+              "trial_count": 85944,
+              "unresolved_global_alignment_trial_count": 84050
+            },
+            "validation": {
+              "fuzzy_global_alignment_trial_count": 0,
+              "implausible_eeg_trial_duration_trial_count": 0,
+              "material_variant_uncertain_trial_count": 0,
+              "missing_text_trial_count": 0,
+              "quality_flag_trial_counts": {
+                "broken_brainvision_reference": 8478,
+                "ok": 152,
+                "orphan_row_event_in_recording": 352,
+                "unresolved_text_alignment": 10414
+              },
+              "trial_count": 10685,
+              "unresolved_global_alignment_trial_count": 10414
+            }
+          }
+        },
+        "source_paradigms": [
+          "silent_reading"
+        ],
+        "target_paradigm": "passive_listening"
+      }
+    },
+    "strict_sensitivity_masks": {
+      "masks": {
+        "fuzzy_global_alignment_group_excluded_from_strict_main": {
+          "content_group_count": 15,
+          "split_group_ids": [
+            "split-group-v1-1df75a61fdbf76c424041ecf",
+            "split-group-v1-2a824fda6c14f79845205ff3",
+            "split-group-v1-429ef1834212d2995cc6659f",
+            "split-group-v1-47f623e736ccdf7d4ce9300a",
+            "split-group-v1-77555fd7ad1f68d099f02939",
+            "split-group-v1-784b3d5254bc1dae0615b926",
+            "split-group-v1-8272560137c46c2734e1fb4a",
+            "split-group-v1-ad7c61b2ad8ae376f10cf246",
+            "split-group-v1-af4d0226fc5d2ea95d5f9381",
+            "split-group-v1-cfee8fa93e5606f4b0f17cb3",
+            "split-group-v1-d9061df7b5e5aa59812df854",
+            "split-group-v1-dbf15456524a4d481e7ee1a0",
+            "split-group-v1-e3483364879dc9c913e9f4c2",
+            "split-group-v1-e949d321862f30d95ef0a8c9",
+            "split-group-v1-fbaee4e0b6efe7e3be2d43bb"
+          ],
+          "trial_count_in_manifest": 300
+        },
+        "material_variant_uncertain_group_excluded_from_strict_main": {
+          "content_group_count": 4,
+          "split_group_ids": [
+            "split-group-v1-165ba1b0a181a2d7f84f330e",
+            "split-group-v1-38b93d6b8e9680b2991f6989",
+            "split-group-v1-b22743d3e07cd888e4844a35",
+            "split-group-v1-e5b97fa19555f78a2dc44bfe"
+          ],
+          "trial_count_in_manifest": 12
+        },
+        "missing_text_group_excluded_from_strict_main": {
+          "content_group_count": 7,
+          "split_group_ids": [
+            "split-group-v1-165ba1b0a181a2d7f84f330e",
+            "split-group-v1-38b93d6b8e9680b2991f6989",
+            "split-group-v1-573f4f8f6c29454b38c1a537",
+            "split-group-v1-b22743d3e07cd888e4844a35",
+            "split-group-v1-b87992d9f36f39549d864a97",
+            "split-group-v1-bff1ef3de08b4402f34378d6",
+            "split-group-v1-e5b97fa19555f78a2dc44bfe"
+          ],
+          "trial_count_in_manifest": 28
+        }
+      },
+      "policy": "whole split_group_id is excluded if any row triggers a mask",
+      "union_content_group_count": 22,
+      "union_trial_count_in_manifest": 328
+    }
+  }
+}
