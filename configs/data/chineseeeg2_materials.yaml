@@ -1,0 +1,13 @@
+dataset_id: chineseeeg2_materials
+root: 'D:/dataset/ChineseEEG-2/materials&embeddings'
+root_env: CHINESEEEG2_MATERIALS_ROOT
+text_embedding_model: bert-base-chinese
+text_embedding_pooling: last_hidden_state_mean
+audio_embedding_model: airesearch/wav2vec2-large-xlsr-53-th
+audio_embedding_pooling: last_hidden_state_mean
+audio_sample_rate_hz: 12000
+pl_speakers: [f1, m1]
+garnettdream_variant_markers:
+  f1_column: E
+  m1_column: F
+

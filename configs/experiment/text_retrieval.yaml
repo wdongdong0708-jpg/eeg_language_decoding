@@ -1,0 +1,15 @@
+experiment_name: strict_eeg_text_retrieval
+paradigms:
+  - silent_reading
+  - passive_listening
+  - reading_aloud
+split:
+  protocol: deterministic_content_group
+  seed: 20260730
+primary_protocols:
+  - unseen_content
+  - unseen_content_unseen_subject
+candidate_pool:
+  primary: length_matched
+objective: symmetric_info_nce
+

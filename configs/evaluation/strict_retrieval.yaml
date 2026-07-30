@@ -1,0 +1,36 @@
+split:
+  algorithm: sha256
+  seed: 20260730
+  train_fraction: 0.8
+  valid_fraction: 0.1
+  test_fraction: 0.1
+  group_key: content_id
+primary_protocols:
+  - unseen_content
+  - unseen_content_unseen_subject
+candidate_pools:
+  - global
+  - length_matched
+length_matching:
+  character_count_tolerance: 1
+  duration_tolerance_sec: 0.5
+  minimum_pool_size: 20
+metrics:
+  - recall_at_1
+  - recall_at_5
+  - recall_at_10
+  - median_rank
+  - mean_reciprocal_rank
+required_shortcut_baselines:
+  - random
+  - duration_only
+  - character_count_only
+  - padding_mask_only
+  - sentence_position_only
+  - subject_id_only
+  - audio_envelope
+statistics:
+  bootstrap_unit: subject
+  permutation_unit: content_block
+  confidence_level: 0.95
+

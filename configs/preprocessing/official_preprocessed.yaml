@@ -1,0 +1,14 @@
+policy_name: preserve_official_preprocessing
+apply_filter: false
+apply_notch: false
+apply_ica: false
+interpolate_bad_channels: false
+rereference: false
+resample: false
+allow_signal_value_mutation: false
+allowed_operations:
+  - crop_within_verified_block_boundaries
+  - cast_dtype
+  - training_fold_only_normalization
+  - deterministic_windowing_within_block
+

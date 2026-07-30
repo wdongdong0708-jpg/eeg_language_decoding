@@ -1,0 +1,22 @@
+dataset_id: chineseeeg2_ra
+paradigm: reading_aloud
+eeg_root: 'D:/dataset/ChineseEEG-2/ReadingAloud/derivatives/preprocessed'
+eeg_root_env: CHINESEEEG2_RA_ROOT
+materials_root: 'D:/dataset/ChineseEEG-2/materials&embeddings'
+sampling_rate_hz: 250
+channel_count: 128
+source_is_official_preprocessed: true
+task_label: reading
+subjects: [sub-f1, sub-f2, sub-m1, sub-m2]
+markers:
+  chapter_prefix: CH
+  block_start: ROWS
+  block_end: ROWE
+presentation:
+  fixed_character_pace_sec: 0.25
+  punctuation_is_highlighted: false
+  claim: visual_character_presentation_only
+notes:
+  - Screen presentation time is not assumed to equal spoken-character or word time.
+  - EEG may contain articulation, EMG, breathing, auditory feedback and envelope cues.
+

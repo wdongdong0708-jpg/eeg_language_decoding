@@ -1,0 +1,16 @@
+encoder:
+  name: temporal_conv_transformer
+  input_channels: 128
+  hidden_dim: 256
+  output_dim: 256
+  dropout: 0.1
+projection:
+  output_dim: 256
+  normalize: true
+contrastive:
+  temperature: 0.07
+  learnable_temperature: false
+mask_inputs:
+  expose_valid_length_to_encoder: false
+  expose_padding_mask_to_pooler: false
+

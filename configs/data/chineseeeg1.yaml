@@ -1,0 +1,23 @@
+dataset_id: chineseeeg1
+paradigm: silent_reading
+eeg_root: 'D:/dataset/ChineseEEG/derivatives/preproc/filtered_0.5_30'
+eeg_root_env: CHINESEEEG1_ROOT
+user_reported_root: 'D:/dataset/ChineseEEG/filtered_0.5_30'
+materials_root: 'D:/dataset/ChineseEEG/derivatives/novels'
+text_embeddings_root: 'D:/dataset/ChineseEEG/derivatives/text_embeddings'
+sampling_rate_hz: 256
+channel_count: 128
+source_is_official_preprocessed: true
+task_label: reading
+sessions:
+  LittlePrince: littleprince
+  GarnettDream: garnettdream
+markers:
+  chapter_prefix: CH
+  block_start: ROWS
+  block_end: ROWE
+presentation:
+  fixed_character_pace_sec: 0.35
+  punctuation_is_highlighted: false
+  claim: visual_character_presentation_only
+

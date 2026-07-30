@@ -1,0 +1,26 @@
+dataset_id: chineseeeg2_pl
+paradigm: passive_listening
+eeg_root: 'D:/dataset/ChineseEEG-2/PassiveListening/derivatives/preprocessed'
+eeg_root_env: CHINESEEEG2_PL_ROOT
+materials_root: 'D:/dataset/ChineseEEG-2/materials&embeddings'
+sampling_rate_hz: 250
+channel_count: 128
+source_is_official_preprocessed: true
+task_label: lis
+markers:
+  chapter_prefix: CH
+  block_start: ROWS
+  block_end: ROWE
+stimulus_speaker_mapping:
+  sub-01: f1
+  sub-02: f1
+  sub-03: f1
+  sub-04: f1
+  sub-05: m1
+  sub-06: m1
+  sub-07: m1
+  sub-08: m1
+notes:
+  - PL ROWS/ROWE are replayed audio-aligned row boundaries derived from RA recordings.
+  - GarnettDream f1 and m1 use different segmentation boundaries.
+

@@ -1,0 +1,18 @@
+experiment_name: pl_speech_retrieval_unit_test
+data: chineseeeg2_pl
+preprocessing: official_preprocessed
+window:
+  length_sec: 4.0
+  stride_sec: 2.0
+  tail_policy: drop
+split:
+  protocol: deterministic_content_group
+  seed: 20260730
+objective: symmetric_info_nce
+required_controls:
+  - random
+  - duration_only
+  - padding_mask_only
+  - subject_id_only
+  - audio_envelope
+
