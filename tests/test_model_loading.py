@@ -156,10 +156,10 @@ def test_audio_extractor_loads_resolved_directory(
 ) -> None:
     calls: list[tuple[str, str]] = []
 
-    class AutoProcessor:
+    class AutoFeatureExtractor:
         @classmethod
         def from_pretrained(cls, path: str, **_: object) -> object:
-            calls.append(("processor", path))
+            calls.append(("feature_extractor", path))
             return object()
 
     class Wav2Vec2Model:
@@ -172,7 +172,7 @@ def test_audio_extractor_loads_resolved_directory(
         sys.modules,
         "transformers",
         SimpleNamespace(
-            AutoProcessor=AutoProcessor,
+            AutoFeatureExtractor=AutoFeatureExtractor,
             Wav2Vec2Model=Wav2Vec2Model,
         ),
     )
@@ -187,6 +187,6 @@ def test_audio_extractor_loads_resolved_directory(
     )
     assert extractor.resolved_model_path == "C:/cache/audio-snapshot"
     assert calls == [
-        ("processor", "C:/cache/audio-snapshot"),
+        ("feature_extractor", "C:/cache/audio-snapshot"),
         ("model", "C:/cache/audio-snapshot"),
     ]

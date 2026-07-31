@@ -16,9 +16,13 @@ import yaml
 from torch.utils.data import DataLoader
 
 from data.pl_speech import load_pl_window_jsonl
-from data.pl_speech_dataset import PLSpeechDataset
+from data.pl_speech_dataset import BrainVisionSegmentReader, PLSpeechDataset
+from data.pl_speech_scaling import (
+    fit_recording_robust_scaler,
+    fit_speech_standard_scaler,
+)
 from evaluation.speech_retrieval import evaluate_speech_retrieval
-from models.eeg_encoder import DilatedSimpleConv
+from models.eeg_encoder import build_eeg_encoder
 from models.losses import ClipContrastiveLoss
 from models.retrieval_model import EEGSpeechRetrievalModel
 from training.samplers import UniqueTargetBatchSampler
@@ -107,11 +111,33 @@ def main() -> None:
             for window in all_windows
             if window.audio_target_id in available_targets
         ]
+    eeg_scaler = None
+    if config["eeg_normalization"] == "train_recording_robust_clamp":
+        eeg_scaler = fit_recording_robust_scaler(
+            window_source,
+            eeg_reader=BrainVisionSegmentReader(),
+            clamp=float(config.get("eeg_clamp", 20.0)),
+        )
+    speech_scaler = None
+    speech_target_scaling = config.get("speech_target_scaling", "none")
+    if speech_target_scaling == "train_global_standard":
+        speech_scaler = fit_speech_standard_scaler(
+            window_source,
+            feature_dir=feature_dir,
+            expected_model_id=config["audio_target"]["model_id"],
+        )
+    elif speech_target_scaling != "none":
+        raise ValueError(
+            f"Unknown speech target scaling: {speech_target_scaling}"
+        )
     train_dataset = PLSpeechDataset(
         window_source,
         partition="train",
         feature_dir=feature_dir,
         eeg_normalization=config["eeg_normalization"],
+        eeg_scaler=eeg_scaler,
+        speech_scaler=speech_scaler,
+        expected_audio_model_id=config["audio_target"]["model_id"],
         cache_speech_targets=bool(config["training"]["cache_speech_targets"]),
     )
     validation_dataset = PLSpeechDataset(
@@ -119,6 +145,9 @@ def main() -> None:
         partition="validation",
         feature_dir=feature_dir,
         eeg_normalization=config["eeg_normalization"],
+        eeg_scaler=eeg_scaler,
+        speech_scaler=speech_scaler,
+        expected_audio_model_id=config["audio_target"]["model_id"],
         cache_speech_targets=bool(config["training"]["cache_speech_targets"]),
     )
     batch_size = int(config["training"]["batch_size"])
@@ -126,7 +155,7 @@ def main() -> None:
         train_dataset.audio_target_ids,
         batch_size=batch_size,
         seed=seed,
-        drop_last=True,
+        drop_last=bool(config["training"].get("drop_last", True)),
     )
     train_loader = DataLoader(
         train_dataset,
@@ -134,11 +163,15 @@ def main() -> None:
         num_workers=int(config["training"]["num_workers"]),
         pin_memory=device.type == "cuda",
     )
+    validation_batch_size = min(
+        int(config["training"].get("validation_batch_size", batch_size)),
+        len(set(validation_dataset.audio_target_ids)),
+    )
     validation_sampler = UniqueTargetBatchSampler(
         validation_dataset.audio_target_ids,
-        batch_size=batch_size,
+        batch_size=validation_batch_size,
         seed=seed + 1,
-        drop_last=True,
+        drop_last=bool(config["training"].get("validation_drop_last", True)),
     )
     validation_loader = DataLoader(
         validation_dataset,
@@ -155,20 +188,10 @@ def main() -> None:
     )
     sample = train_dataset[0]
     encoder_config = config["model"]
-    encoder = DilatedSimpleConv(
+    encoder = build_eeg_encoder(
+        encoder_config,
         input_channels=int(sample["eeg"].shape[0]),
         output_channels=int(sample["speech"].shape[0]),
-        hidden_channels=int(encoder_config["hidden_channels"]),
-        depth=int(encoder_config["depth"]),
-        kernel_size=int(encoder_config["kernel_size"]),
-        growth=float(encoder_config["growth"]),
-        dilation_growth=int(encoder_config["dilation_growth"]),
-        dilation_period=encoder_config.get("dilation_period"),
-        dropout=float(encoder_config["dropout"]),
-        dropout_input=float(encoder_config["dropout_input"]),
-        batch_norm=bool(encoder_config["batch_norm"]),
-        residual=bool(encoder_config["residual"]),
-        activation_on_last=bool(encoder_config["activation_on_last"]),
     )
     loss_config = config["loss"]
     objective = ClipContrastiveLoss(
@@ -180,7 +203,14 @@ def main() -> None:
         pool=bool(loss_config["pool"]),
     )
     model = EEGSpeechRetrievalModel(encoder, objective).to(device)
-    optimizer = torch.optim.AdamW(
+    optimizer_name = str(config["training"].get("optimizer", "adamw")).lower()
+    optimizer_class = {
+        "adam": torch.optim.Adam,
+        "adamw": torch.optim.AdamW,
+    }.get(optimizer_name)
+    if optimizer_class is None:
+        raise ValueError(f"Unknown optimizer: {optimizer_name}")
+    optimizer = optimizer_class(
         model.parameters(),
         lr=float(config["training"]["learning_rate"]),
         weight_decay=float(config["training"]["weight_decay"]),
@@ -191,6 +221,10 @@ def main() -> None:
     best_validation_loss = float("inf")
     best_epoch = -1
     best_model_state: dict[str, torch.Tensor] | None = None
+    gradient_clip_value = config["training"].get("gradient_clip_norm")
+    gradient_clip_norm = (
+        None if gradient_clip_value is None else float(gradient_clip_value)
+    )
     for epoch in range(epochs):
         train_sampler.set_epoch(epoch)
         train_result = train_one_epoch(
@@ -199,7 +233,7 @@ def main() -> None:
             optimizer,
             device=device,
             max_batches=max_batches,
-            gradient_clip_norm=float(config["training"]["gradient_clip_norm"]),
+            gradient_clip_norm=gradient_clip_norm,
         )
         validation_result = evaluate_loss(
             model,
@@ -247,6 +281,7 @@ def main() -> None:
         "seed": seed,
         "device": str(device),
         "window_index": window_jsonl,
+        "audio_feature_dir": str(feature_dir),
         "active_eeg_delay_ms": delays[0],
         "window_index_sha256": _file_sha256(window_jsonl),
         "config": config,
@@ -254,6 +289,22 @@ def main() -> None:
         "epochs_run": epochs,
         "best_epoch": best_epoch,
         "best_validation_loss": best_validation_loss,
+        "preprocessing": {
+            "eeg": eeg_scaler.audit() if eeg_scaler is not None else {
+                "name": config["eeg_normalization"],
+            },
+            "speech": (
+                speech_scaler.audit()
+                if speech_scaler is not None
+                else {"name": speech_target_scaling}
+            ),
+        },
+        "batching": {
+            "training_batch_size": batch_size,
+            "training_drop_last": train_sampler.drop_last,
+            "validation_batch_size": validation_batch_size,
+            "validation_drop_last": validation_sampler.drop_last,
+        },
         "determinism": {
             "torch_deterministic_algorithms": True,
             "cudnn_benchmark": False,
@@ -286,8 +337,19 @@ def main() -> None:
     )
     torch.save(
         {
+            "schema_version": "pl-speech-retrieval-checkpoint-v2",
             "model_state": model.state_dict(),
             "optimizer_state": optimizer.state_dict(),
+            "preprocessing_state": {
+                "eeg": (
+                    eeg_scaler.state_dict() if eeg_scaler is not None else None
+                ),
+                "speech": (
+                    speech_scaler.state_dict()
+                    if speech_scaler is not None
+                    else None
+                ),
+            },
             "report_path": report_path.as_posix(),
             "window_index_sha256": report["window_index_sha256"],
         },

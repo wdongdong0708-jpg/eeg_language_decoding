@@ -1,0 +1,100 @@
+experiment_name: pl_meta_aligned_no_subject_nonoverlap
+seed: 42
+device: cuda
+
+data:
+  dataset: ChineseEEG2
+  paradigm: passive_listening
+  manifest: metadata/all_trials.parquet
+  split_artifact: splits/text_unseen_seed42.json
+  split_setting: A_text_unseen_subject_seen
+
+window:
+  length_sec: 3.0
+  stride_sec: 3.0
+  tail_policy: drop
+  allow_overlap: false
+  active_eeg_delay_ms: 500
+  delay_selection_partition: validation
+  test_evaluated_once_after_delay_selection: true
+
+# Common support preserves the already-selected 500 ms delay comparison set.
+window_index: experiments/pl_delay_sweep/windows_delay_500ms_common.jsonl
+audio_feature_dir: experiments/features/pl_speech_facebook_xlsr53_3s_common
+eeg_normalization: train_recording_robust_clamp
+eeg_clamp: 20.0
+speech_target_scaling: train_global_standard
+
+sampling:
+  eeg_downsampling: false
+  eeg_source_sample_rate_hz: 250
+  target_time_steps: 750
+
+audio_target:
+  model_id: facebook/wav2vec2-large-xlsr-53
+  model_sample_rate_hz: 16000
+  hidden_layers: [14, 15, 16, 17, 18]
+  layer_reduction: arithmetic_mean
+  temporal_pooling: false
+  output_channels: 1024
+  interpolate_to_eeg_samples: true
+  scaler: train_global_standard
+  scaler_per_channel: false
+
+model:
+  name: meta_aligned_conv_no_subject
+  subject_layer: false
+  spatial_merger: false
+  initial_channels: 270
+  hidden_channels: 320
+  depth: 10
+  kernel_size: 3
+  dilation_growth: 2
+  dilation_period: 5
+  batch_norm: true
+  skip: true
+  activation: gelu
+  glu_every: 2
+  glu_context: 1
+  complex_output: true
+
+loss:
+  name: clip_contrastive_sequence
+  norm_kind: y
+  temperature: 1.0
+  learn_temperature: false
+  symmetric: false
+  center: false
+  pool: false
+  multi_positive: false
+
+training:
+  optimizer: adam
+  batch_size: 128
+  epochs: 20
+  learning_rate: 0.0003
+  weight_decay: 0.0
+  gradient_clip_norm:
+  num_workers: 0
+  unique_audio_target_per_batch: true
+  drop_last: false
+  cache_speech_targets: true
+  validation_drop_last: false
+
+evaluation:
+  candidate_identity: audio_target_id
+  unique_candidates: true
+  tie_policy: pessimistic
+  query_batch_size: 8
+  candidate_batch_size: 32
+  position_local_pool_size: 20
+  smoke_max_queries: 4
+  metrics: [recall_at_1, recall_at_5, recall_at_10, median_rank, mean_reciprocal_rank]
+
+controlled_differences_from_brainmagick:
+  subject_layer: false
+  spatial_merger: false
+  overlapping_windows: false
+  eeg_downsampling: false
+
+output_dir: experiments/pl_meta_no_subject_nonoverlap_seed42_delay500ms

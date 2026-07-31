@@ -11,8 +11,12 @@ from pathlib import Path
 import torch
 
 from data.pl_speech_dataset import PLSpeechDataset
+from data.pl_speech_scaling import (
+    RecordingRobustScaler,
+    SpeechStandardScaler,
+)
 from evaluation.speech_retrieval import evaluate_speech_retrieval
-from models.eeg_encoder import DilatedSimpleConv
+from models.eeg_encoder import build_eeg_encoder
 from models.losses import ClipContrastiveLoss
 from models.retrieval_model import EEGSpeechRetrievalModel
 
@@ -48,29 +52,43 @@ def main() -> None:
         or config.get("device")
         or ("cuda" if torch.cuda.is_available() else "cpu")
     )
+    checkpoint = torch.load(
+        args.checkpoint,
+        map_location=device,
+        weights_only=True,
+    )
+    preprocessing_state = checkpoint.get("preprocessing_state", {})
+    eeg_scaler_state = preprocessing_state.get("eeg")
+    speech_scaler_state = preprocessing_state.get("speech")
+    eeg_scaler = (
+        RecordingRobustScaler.from_state_dict(eeg_scaler_state)
+        if eeg_scaler_state is not None
+        else None
+    )
+    speech_scaler = (
+        SpeechStandardScaler.from_state_dict(speech_scaler_state)
+        if speech_scaler_state is not None
+        else None
+    )
     dataset = PLSpeechDataset(
         training_report["window_index"],
         partition=args.partition,
-        feature_dir=config["audio_feature_dir"],
+        feature_dir=training_report.get(
+            "audio_feature_dir",
+            config["audio_feature_dir"],
+        ),
         eeg_normalization=config["eeg_normalization"],
+        eeg_scaler=eeg_scaler,
+        speech_scaler=speech_scaler,
+        expected_audio_model_id=config["audio_target"]["model_id"],
         cache_speech_targets=True,
     )
     sample = dataset[0]
     encoder_config = config["model"]
-    encoder = DilatedSimpleConv(
+    encoder = build_eeg_encoder(
+        encoder_config,
         input_channels=int(sample["eeg"].shape[0]),
         output_channels=int(sample["speech"].shape[0]),
-        hidden_channels=int(encoder_config["hidden_channels"]),
-        depth=int(encoder_config["depth"]),
-        kernel_size=int(encoder_config["kernel_size"]),
-        growth=float(encoder_config["growth"]),
-        dilation_growth=int(encoder_config["dilation_growth"]),
-        dilation_period=encoder_config.get("dilation_period"),
-        dropout=float(encoder_config["dropout"]),
-        dropout_input=float(encoder_config["dropout_input"]),
-        batch_norm=bool(encoder_config["batch_norm"]),
-        residual=bool(encoder_config["residual"]),
-        activation_on_last=bool(encoder_config["activation_on_last"]),
     )
     loss_config = config["loss"]
     model = EEGSpeechRetrievalModel(
@@ -84,11 +102,6 @@ def main() -> None:
             pool=bool(loss_config["pool"]),
         ),
     ).to(device)
-    checkpoint = torch.load(
-        args.checkpoint,
-        map_location=device,
-        weights_only=True,
-    )
     model.load_state_dict(checkpoint["model_state"])
     pool_size = min(
         int(config["evaluation"]["position_local_pool_size"]),

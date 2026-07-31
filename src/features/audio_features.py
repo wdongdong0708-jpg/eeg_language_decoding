@@ -263,9 +263,9 @@ class Wav2VecFrameExtractor:
             config.model_id,
             local_files_only=local_files_only,
         )
-        from transformers import AutoProcessor, Wav2Vec2Model
+        from transformers import AutoFeatureExtractor, Wav2Vec2Model
 
-        processor = AutoProcessor.from_pretrained(
+        processor = AutoFeatureExtractor.from_pretrained(
             model_source,
             local_files_only=local_files_only,
         )
