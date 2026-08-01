@@ -18,6 +18,454 @@
     "reading_aloud": 20440,
     "silent_reading": 107414
   },
+  "pl_garnettdream_audio_validation": {
+    "f1": {
+      "audio_start_count": 13,
+      "events_data": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_f1\\events_data.json",
+      "extra_audio_segment_event_counts": {
+        "0": 20,
+        "10": 161,
+        "11": 134,
+        "12": 1
+      },
+      "mapped_span_count": 2147,
+      "protocol_run_ids": [
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "21",
+        "22",
+        "23",
+        "24"
+      ],
+      "row_end_count": 2463,
+      "row_start_count": 2464,
+      "runs": {
+        "11": {
+          "audio_file": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_f1\\audio_1.wav",
+          "audio_index": 1,
+          "boundary_clamped_count": 1,
+          "boundary_invalid_count": 0,
+          "canonical_excel_row_range": [
+            23,
+            254
+          ],
+          "duration_char_count_pearson": 0.9998813142714778,
+          "event_pair_count": 232,
+          "sequence_evidence": {
+            "duration_char_count_pearson": 0.9998813142714778,
+            "event_pair_count": 232,
+            "fixed_visual_pace_sec": 0.25,
+            "interpretation": "sequence evidence, not speech timestamps",
+            "median_absolute_duration_residual_sec": 0.03600000000000003,
+            "row_count": 232,
+            "version": "event-to-stimulus-row-v1"
+          },
+          "text_unit_count": 232,
+          "validated": true
+        },
+        "12": {
+          "audio_file": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_f1\\audio_2.wav",
+          "audio_index": 2,
+          "boundary_clamped_count": 1,
+          "boundary_invalid_count": 0,
+          "canonical_excel_row_range": [
+            254,
+            516
+          ],
+          "duration_char_count_pearson": 0.9936656250425351,
+          "event_pair_count": 263,
+          "sequence_evidence": {
+            "duration_char_count_pearson": 0.9936656250425351,
+            "event_pair_count": 263,
+            "fixed_visual_pace_sec": 0.25,
+            "interpretation": "sequence evidence, not speech timestamps",
+            "median_absolute_duration_residual_sec": 0.03600000000000003,
+            "row_count": 263,
+            "version": "event-to-stimulus-row-v1"
+          },
+          "text_unit_count": 263,
+          "validated": true
+        },
+        "13": {
+          "audio_file": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_f1\\audio_3.wav",
+          "audio_index": 3,
+          "boundary_clamped_count": 1,
+          "boundary_invalid_count": 0,
+          "canonical_excel_row_range": [
+            517,
+            685
+          ],
+          "duration_char_count_pearson": 0.9998297267377767,
+          "event_pair_count": 169,
+          "sequence_evidence": {
+            "duration_char_count_pearson": 0.9998297267377767,
+            "event_pair_count": 169,
+            "fixed_visual_pace_sec": 0.25,
+            "interpretation": "sequence evidence, not speech timestamps",
+            "median_absolute_duration_residual_sec": 0.03600000000000003,
+            "row_count": 169,
+            "version": "event-to-stimulus-row-v1"
+          },
+          "text_unit_count": 169,
+          "validated": true
+        },
+        "14": {
+          "audio_file": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_f1\\audio_4.wav",
+          "audio_index": 4,
+          "boundary_clamped_count": 1,
+          "boundary_invalid_count": 0,
+          "canonical_excel_row_range": [
+            686,
+            1026
+          ],
+          "duration_char_count_pearson": 0.999312412959155,
+          "event_pair_count": 341,
+          "sequence_evidence": {
+            "duration_char_count_pearson": 0.999312412959155,
+            "event_pair_count": 341,
+            "fixed_visual_pace_sec": 0.25,
+            "interpretation": "sequence evidence, not speech timestamps",
+            "median_absolute_duration_residual_sec": 0.03600000000000003,
+            "row_count": 341,
+            "version": "event-to-stimulus-row-v1"
+          },
+          "text_unit_count": 341,
+          "validated": true
+        },
+        "15": {
+          "audio_file": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_f1\\audio_5.wav",
+          "audio_index": 5,
+          "boundary_clamped_count": 1,
+          "boundary_invalid_count": 0,
+          "canonical_excel_row_range": [
+            1027,
+            1320
+          ],
+          "duration_char_count_pearson": 0.999241952835624,
+          "event_pair_count": 294,
+          "sequence_evidence": {
+            "duration_char_count_pearson": 0.999241952835624,
+            "event_pair_count": 294,
+            "fixed_visual_pace_sec": 0.25,
+            "interpretation": "sequence evidence, not speech timestamps",
+            "median_absolute_duration_residual_sec": 0.038000000000000145,
+            "row_count": 294,
+            "version": "event-to-stimulus-row-v1"
+          },
+          "text_unit_count": 294,
+          "validated": true
+        },
+        "21": {
+          "audio_file": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_f1\\audio_6.wav",
+          "audio_index": 6,
+          "boundary_clamped_count": 1,
+          "boundary_invalid_count": 0,
+          "canonical_excel_row_range": [
+            1320,
+            1516
+          ],
+          "duration_char_count_pearson": 0.9837588617945436,
+          "event_pair_count": 197,
+          "sequence_evidence": {
+            "duration_char_count_pearson": 0.9837588617945436,
+            "event_pair_count": 197,
+            "fixed_visual_pace_sec": 0.25,
+            "interpretation": "sequence evidence, not speech timestamps",
+            "median_absolute_duration_residual_sec": 0.040000000000000036,
+            "row_count": 197,
+            "version": "event-to-stimulus-row-v1"
+          },
+          "text_unit_count": 197,
+          "validated": true
+        },
+        "22": {
+          "audio_file": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_f1\\audio_7.wav",
+          "audio_index": 7,
+          "boundary_clamped_count": 1,
+          "boundary_invalid_count": 0,
+          "canonical_excel_row_range": [
+            1517,
+            1798
+          ],
+          "duration_char_count_pearson": 0.9994012034926643,
+          "event_pair_count": 282,
+          "sequence_evidence": {
+            "duration_char_count_pearson": 0.9994012034926643,
+            "event_pair_count": 282,
+            "fixed_visual_pace_sec": 0.25,
+            "interpretation": "sequence evidence, not speech timestamps",
+            "median_absolute_duration_residual_sec": 0.03799999999999981,
+            "row_count": 282,
+            "version": "event-to-stimulus-row-v1"
+          },
+          "text_unit_count": 282,
+          "validated": true
+        },
+        "23": {
+          "audio_file": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_f1\\audio_8.wav",
+          "audio_index": 8,
+          "boundary_clamped_count": 1,
+          "boundary_invalid_count": 0,
+          "canonical_excel_row_range": [
+            1799,
+            2033
+          ],
+          "duration_char_count_pearson": 0.9981183342037699,
+          "event_pair_count": 235,
+          "sequence_evidence": {
+            "duration_char_count_pearson": 0.9981183342037699,
+            "event_pair_count": 235,
+            "fixed_visual_pace_sec": 0.25,
+            "interpretation": "sequence evidence, not speech timestamps",
+            "median_absolute_duration_residual_sec": 0.04400000000000004,
+            "row_count": 235,
+            "version": "event-to-stimulus-row-v1"
+          },
+          "text_unit_count": 235,
+          "validated": true
+        },
+        "24": {
+          "audio_file": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_f1\\audio_9.wav",
+          "audio_index": 9,
+          "boundary_clamped_count": 1,
+          "boundary_invalid_count": 0,
+          "canonical_excel_row_range": [
+            2034,
+            2167
+          ],
+          "duration_char_count_pearson": 0.9969975832217435,
+          "event_pair_count": 134,
+          "sequence_evidence": {
+            "duration_char_count_pearson": 0.9969975832217435,
+            "event_pair_count": 134,
+            "fixed_visual_pace_sec": 0.25,
+            "interpretation": "sequence evidence, not speech timestamps",
+            "median_absolute_duration_residual_sec": 0.04999999999999982,
+            "row_count": 134,
+            "version": "event-to-stimulus-row-v1"
+          },
+          "text_unit_count": 134,
+          "validated": true
+        }
+      },
+      "timeline_shape_valid": true,
+      "validated": true,
+      "wav_count": 12
+    },
+    "m1": {
+      "audio_start_count": 10,
+      "events_data": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_m1\\events_data.json",
+      "extra_audio_segment_event_counts": {
+        "0": 20,
+        "9": 1
+      },
+      "mapped_span_count": 2491,
+      "protocol_run_ids": [
+        "11",
+        "12",
+        "13",
+        "14",
+        "21",
+        "22",
+        "23",
+        "24"
+      ],
+      "row_end_count": 2512,
+      "row_start_count": 2513,
+      "runs": {
+        "11": {
+          "audio_file": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_m1\\audio_1.wav",
+          "audio_index": 1,
+          "boundary_clamped_count": 1,
+          "boundary_invalid_count": 0,
+          "canonical_excel_row_range": [
+            23,
+            516
+          ],
+          "duration_char_count_pearson": 0.9997671947717978,
+          "event_pair_count": 494,
+          "sequence_evidence": {
+            "duration_char_count_pearson": 0.9997671947717978,
+            "event_pair_count": 494,
+            "fixed_visual_pace_sec": 0.25,
+            "interpretation": "sequence evidence, not speech timestamps",
+            "median_absolute_duration_residual_sec": 0.03600000000000003,
+            "row_count": 494,
+            "version": "event-to-stimulus-row-v1"
+          },
+          "text_unit_count": 494,
+          "validated": true
+        },
+        "12": {
+          "audio_file": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_m1\\audio_2.wav",
+          "audio_index": 2,
+          "boundary_clamped_count": 1,
+          "boundary_invalid_count": 0,
+          "canonical_excel_row_range": [
+            517,
+            685
+          ],
+          "duration_char_count_pearson": 0.9998702137978097,
+          "event_pair_count": 169,
+          "sequence_evidence": {
+            "duration_char_count_pearson": 0.9998702137978097,
+            "event_pair_count": 169,
+            "fixed_visual_pace_sec": 0.25,
+            "interpretation": "sequence evidence, not speech timestamps",
+            "median_absolute_duration_residual_sec": 0.03600000000000003,
+            "row_count": 169,
+            "version": "event-to-stimulus-row-v1"
+          },
+          "text_unit_count": 169,
+          "validated": true
+        },
+        "13": {
+          "audio_file": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_m1\\audio_3.wav",
+          "audio_index": 3,
+          "boundary_clamped_count": 1,
+          "boundary_invalid_count": 0,
+          "canonical_excel_row_range": [
+            686,
+            1026
+          ],
+          "duration_char_count_pearson": 0.9994007275332272,
+          "event_pair_count": 341,
+          "sequence_evidence": {
+            "duration_char_count_pearson": 0.9994007275332272,
+            "event_pair_count": 341,
+            "fixed_visual_pace_sec": 0.25,
+            "interpretation": "sequence evidence, not speech timestamps",
+            "median_absolute_duration_residual_sec": 0.03799999999999981,
+            "row_count": 341,
+            "version": "event-to-stimulus-row-v1"
+          },
+          "text_unit_count": 341,
+          "validated": true
+        },
+        "14": {
+          "audio_file": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_m1\\audio_4.wav",
+          "audio_index": 4,
+          "boundary_clamped_count": 1,
+          "boundary_invalid_count": 0,
+          "canonical_excel_row_range": [
+            1027,
+            1516
+          ],
+          "duration_char_count_pearson": 0.9993762031170806,
+          "event_pair_count": 490,
+          "sequence_evidence": {
+            "duration_char_count_pearson": 0.9993762031170806,
+            "event_pair_count": 490,
+            "fixed_visual_pace_sec": 0.25,
+            "interpretation": "sequence evidence, not speech timestamps",
+            "median_absolute_duration_residual_sec": 0.040000000000000036,
+            "row_count": 490,
+            "version": "event-to-stimulus-row-v1"
+          },
+          "text_unit_count": 490,
+          "validated": true
+        },
+        "21": {
+          "audio_file": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_m1\\audio_5.wav",
+          "audio_index": 5,
+          "boundary_clamped_count": 1,
+          "boundary_invalid_count": 0,
+          "canonical_excel_row_range": [
+            1517,
+            1798
+          ],
+          "duration_char_count_pearson": 0.999132773332464,
+          "event_pair_count": 282,
+          "sequence_evidence": {
+            "duration_char_count_pearson": 0.999132773332464,
+            "event_pair_count": 282,
+            "fixed_visual_pace_sec": 0.25,
+            "interpretation": "sequence evidence, not speech timestamps",
+            "median_absolute_duration_residual_sec": 0.03699999999999992,
+            "row_count": 282,
+            "version": "event-to-stimulus-row-v1"
+          },
+          "text_unit_count": 282,
+          "validated": true
+        },
+        "22": {
+          "audio_file": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_m1\\audio_6.wav",
+          "audio_index": 6,
+          "boundary_clamped_count": 1,
+          "boundary_invalid_count": 0,
+          "canonical_excel_row_range": [
+            1799,
+            2033
+          ],
+          "duration_char_count_pearson": 0.9977460697165915,
+          "event_pair_count": 235,
+          "sequence_evidence": {
+            "duration_char_count_pearson": 0.9977460697165915,
+            "event_pair_count": 235,
+            "fixed_visual_pace_sec": 0.25,
+            "interpretation": "sequence evidence, not speech timestamps",
+            "median_absolute_duration_residual_sec": 0.04400000000000004,
+            "row_count": 235,
+            "version": "event-to-stimulus-row-v1"
+          },
+          "text_unit_count": 235,
+          "validated": true
+        },
+        "23": {
+          "audio_file": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_m1\\audio_7.wav",
+          "audio_index": 7,
+          "boundary_clamped_count": 1,
+          "boundary_invalid_count": 0,
+          "canonical_excel_row_range": [
+            2034,
+            2327
+          ],
+          "duration_char_count_pearson": 0.9994702433295467,
+          "event_pair_count": 294,
+          "sequence_evidence": {
+            "duration_char_count_pearson": 0.9994702433295467,
+            "event_pair_count": 294,
+            "fixed_visual_pace_sec": 0.25,
+            "interpretation": "sequence evidence, not speech timestamps",
+            "median_absolute_duration_residual_sec": 0.04400000000000004,
+            "row_count": 294,
+            "version": "event-to-stimulus-row-v1"
+          },
+          "text_unit_count": 294,
+          "validated": true
+        },
+        "24": {
+          "audio_file": "D:\\dataset\\ChineseEEG-2\\materials&embeddings\\audio\\garnettdream_m1\\audio_8.wav",
+          "audio_index": 8,
+          "boundary_clamped_count": 1,
+          "boundary_invalid_count": 0,
+          "canonical_excel_row_range": [
+            2328,
+            2513
+          ],
+          "duration_char_count_pearson": 0.9958993873058929,
+          "event_pair_count": 186,
+          "sequence_evidence": {
+            "duration_char_count_pearson": 0.9958993873058929,
+            "event_pair_count": 186,
+            "fixed_visual_pace_sec": 0.25,
+            "interpretation": "sequence evidence, not speech timestamps",
+            "median_absolute_duration_residual_sec": 0.04400000000000004,
+            "row_count": 186,
+            "version": "event-to-stimulus-row-v1"
+          },
+          "text_unit_count": 186,
+          "validated": true
+        }
+      },
+      "timeline_shape_valid": true,
+      "validated": true,
+      "wav_count": 9
+    }
+  },
   "pl_littleprince_audio_validation": {
     "f1": {
       "audio_start_count": 28,
@@ -47,24 +495,20 @@
     "event_text_count_mismatch|implausible_eeg_trial_duration|missing_text|orphan_row_event_in_recording|pl_audio_mapping_unverified|unresolved_text_alignment": 2,
     "event_text_count_mismatch|implausible_eeg_trial_duration|orphan_row_event_in_recording": 1,
     "event_text_count_mismatch|material_variant_uncertain|missing_text|orphan_row_event_in_recording|ra_audio_boundary_unavailable|unresolved_text_alignment": 3,
-    "event_text_count_mismatch|orphan_row_event_in_recording": 1605,
-    "event_text_count_mismatch|orphan_row_event_in_recording|pl_audio_mapping_unverified": 659,
+    "event_text_count_mismatch|orphan_row_event_in_recording": 2263,
+    "event_text_count_mismatch|orphan_row_event_in_recording|pl_audio_mapping_unverified": 1,
     "event_text_count_mismatch|orphan_row_event_in_recording|ra_audio_boundary_unavailable": 680,
-    "event_text_count_mismatch|pl_audio_mapping_unverified": 920,
-    "event_text_count_mismatch|ra_audio_boundary_unavailable": 690,
     "events_vmrk_count_mismatch": 41,
-    "implausible_eeg_trial_duration|pl_audio_mapping_unverified": 4,
+    "implausible_eeg_trial_duration": 4,
     "implausible_eeg_trial_duration|ra_audio_boundary_unavailable": 1,
     "material_variant_uncertain|missing_text|orphan_row_event_in_recording|ra_audio_boundary_unavailable|unresolved_text_alignment": 2,
-    "material_variant_uncertain|missing_text|pl_audio_mapping_unverified|unresolved_text_alignment": 4,
-    "material_variant_uncertain|missing_text|ra_audio_boundary_unavailable|unresolved_text_alignment": 3,
     "missing_text|orphan_row_event_in_recording|prechapter_trial_unresolved|unresolved_text_alignment": 14,
-    "ok": 21100,
+    "ok": 38927,
     "orphan_row_event_in_recording": 200,
     "orphan_row_event_in_recording|ra_audio_boundary_unavailable": 207,
     "orphan_row_event_in_recording|unresolved_text_alignment": 2928,
-    "pl_audio_mapping_unverified": 16933,
-    "ra_audio_boundary_unavailable": 18854,
+    "pl_audio_mapping_unverified": 30,
+    "ra_audio_boundary_unavailable": 19547,
     "unresolved_text_alignment": 17040
   },
   "recordings_without_legal_pairs": [
@@ -84,7 +528,7 @@
     "chineseeeg2_ra_root": "D:\\dataset\\ChineseEEG-2\\ReadingAloud\\derivatives\\preprocessed"
   },
   "row_count": 168156,
-  "split_group_count": 16679,
+  "split_group_count": 16678,
   "split_seed": 20260730,
   "unparsed_headers": []
 }

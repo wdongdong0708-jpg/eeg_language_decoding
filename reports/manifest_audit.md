@@ -31,9 +31,9 @@ The full dataset/paradigm/subject/book/chapter table is available in `reports/ma
 
 ## Missingness and event integrity
 
-- Trials with unresolved local text: 28
+- Trials with unresolved local text: 21
 - Recordings missing event TSV: 5
-- PL trials without validated audio bounds: 18,522
+- PL trials without validated audio bounds: 33
 - RA trials with intentionally null audio bounds: 20,440
 
 ### Source event anomalies
@@ -46,8 +46,8 @@ The full dataset/paradigm/subject/book/chapter table is available in `reports/ma
 
 ## Alignment
 
-- Event-to-source statuses: `{"exact": 163572, "fuzzy": 4556, "unresolved": 28}`
-- Cross-dataset/global statuses: `{"exact": 63111, "fuzzy": 131, "unresolved": 104914}`
+- Event-to-source statuses: `{"exact": 165189, "fuzzy": 2946, "unresolved": 21}`
+- Cross-dataset/global statuses: `{"exact": 63118, "fuzzy": 131, "unresolved": 104907}`
 - `global_text_id` conflicts: 0
 
 ChineseEEG1-to-ChineseEEG2 sharing uses monotonic exact anchors and reciprocal fuzzy matches inside anchor gaps. It never joins by row number across datasets. Unaccepted matches retain dataset-local IDs.
@@ -57,30 +57,30 @@ ChineseEEG1-to-ChineseEEG2 sharing uses monotonic exact anchors and reciprocal f
 | flag | trials |
 |---|---:|
 | broken_brainvision_reference | 86,264 |
-| event_text_count_mismatch | 4,561 |
+| event_text_count_mismatch | 2,951 |
 | events_vmrk_count_mismatch | 41 |
 | implausible_eeg_trial_duration | 8 |
-| material_variant_uncertain | 12 |
-| missing_text | 28 |
-| ok | 21,100 |
+| material_variant_uncertain | 5 |
+| missing_text | 21 |
+| ok | 38,927 |
 | orphan_row_event_in_recording | 6,301 |
-| pl_audio_mapping_unverified | 18,522 |
+| pl_audio_mapping_unverified | 33 |
 | prechapter_trial_unresolved | 14 |
 | ra_audio_boundary_unavailable | 20,440 |
-| unresolved_text_alignment | 104,914 |
+| unresolved_text_alignment | 104,907 |
 
 ## Deterministic splits and leakage
 
-- Content groups: 16,679
-- Group counts: `{"test": 1647, "train": 13386, "valid": 1646}`
-- Trial counts: `{"test": 16731, "train": 135024, "valid": 16401}`
+- Content groups: 16,678
+- Group counts: `{"test": 1647, "train": 13385, "valid": 1646}`
+- Trial counts: `{"test": 16730, "train": 135018, "valid": 16408}`
 - Same `split_group_id` crossing splits: **0**
 - Stored split versus fixed-hash mismatch: **0**
 
 ## Duration and shortcut-relevant fields
 
 - EEG seconds: `{"count": 168156, "min": 0.004, "p05": 0.75390625, "median": 3.708, "p95": 4.3359375, "max": 5.188, "mean": 3.0840226986027854}`
-- Validated audio seconds: `{"count": 21780, "min": 0.1280000000000001, "p05": 0.4760000000000133, "median": 1.7239999999999966, "p95": 3.7040000000000077, "max": 5.188000000000002, "mean": 1.898690541781451}`
+- Validated audio seconds: `{"count": 40269, "min": 0.06400000000002137, "p05": 0.47999999999999987, "median": 1.9720000000000013, "p95": 4.200000000000003, "max": 5.188000000000002, "mean": 2.144952097146688}`
 
 `char_count`, `raw_char_count`, `highlight_char_count`, EEG/audio duration and padding-relevant boundaries are explicit manifest fields for later shortcut baselines and length-matched candidate pools.
 
@@ -98,12 +98,12 @@ Near-duplicate detection is audit-only and never merges identities.
 - Row count equal: `True`
 - Primary-key order equal: `True`
 - Critical-field digest equal: `True`
-- Digest: `7b0f92220c00e28648632e9b418a6cd5bd88b7ad832532f25ff0e35512778e0d`
+- Digest: `0afc05cf298ab5409ee8d4806edad0b164378ce1417c3024353cd22da3fceccf`
 
 ## Conservative unresolved mappings
 
-- Grouped unresolved text entries: 20
-- Grouped null audio entries: 245
+- Grouped unresolved text entries: 13
+- Grouped null audio entries: 177
 - Recordings with no legal trial pair: 5
 
 The complete grouped lists and source recording paths are in `reports/manifest_audit.json`. Null values are intentional wherever the evidence does not support an alignment.

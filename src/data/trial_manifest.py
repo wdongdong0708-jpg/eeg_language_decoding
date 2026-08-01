@@ -61,6 +61,43 @@ from data.text_normalization import (
 DEFAULT_SPLIT_SEED = 20260730
 EVENT_ALIGNMENT_VERSION = "event-to-stimulus-row-v1"
 AUDIO_ALIGNMENT_VERSION = "pl-audio-events-v1"
+GARNETTDREAM_AUDIO_ALIGNMENT_VERSION = (
+    "pl-garnettdream-acquisition-segment-audio-v1"
+)
+
+_GARNETTDREAM_F1_PL_RUN_RANGES = {
+    "11": (23, 254),
+    "12": (254, 516),
+    "13": (517, 685),
+    "14": (686, 1026),
+    "15": (1027, 1320),
+    "21": (1320, 1516),
+    "22": (1517, 1798),
+    "23": (1799, 2033),
+    "24": (2034, 2167),
+}
+_GARNETTDREAM_M1_PL_RUN_RANGES = {
+    "11": (23, 516),
+    "12": (517, 685),
+    "13": (686, 1026),
+    "14": (1027, 1516),
+    "21": (1517, 1798),
+    "22": (1799, 2033),
+    "23": (2034, 2327),
+    "24": (2328, 2513),
+}
+_GARNETTDREAM_M1_RA_RUN_RANGES = {
+    "11": (23, 516),
+    "12": (517, 685),
+    "13": (686, 1026),
+    "14": (1027, 1516),
+    "15": (1517, 1798),
+    "21": (1799, 2033),
+    "22": (2034, 2327),
+    "23": (2328, 2513),
+}
+_GARNETTDREAM_AUDIO_EVENT_RATE_HZ = 250.0
+_GARNETTDREAM_AUDIO_END_TOLERANCE_SEC = 0.5
 
 _HEADER_PATTERN = re.compile(
     r"^sub-(?P<subject>[^_]+)_ses-(?P<session>[^_]+)_task-(?P<task>[^_]+)"
@@ -132,6 +169,10 @@ class AudioSpan:
     start_sec: float
     end_sec: float
     evidence: str
+    method: str = AUDIO_ALIGNMENT_VERSION
+
+
+AudioSpanKey = tuple[str, str | None, str]
 
 
 @dataclass(frozen=True, slots=True)
@@ -462,45 +503,15 @@ def select_ce2_run_units(
     else:
         variant = subject_id
 
-    # Boundaries come from the workbook f1/m1 columns and retain the documented
-    # overlap at Excel row 1320 in the f1 stimulus variant.
-    f1_ranges = {
-        "11": (22, 253),
-        "12": (254, 516),
-        "13": (517, 685),
-        "14": (686, 1026),
-        "15": (1027, 1320),
-        "21": (1320, 1516),
-        "22": (1517, 1798),
-        "23": (1799, 2033),
-        "24": (2034, 2167),
-    }
-    m1_pl_ranges = {
-        "11": (23, 516),
-        "12": (517, 685),
-        "13": (686, 1026),
-        "14": (1027, 1516),
-        "21": (1517, 1798),
-        "22": (1799, 2033),
-        "23": (2034, 2327),
-        "24": (2328, 2513),
-    }
-    m1_ra_ranges = {
-        "11": (23, 516),
-        "12": (517, 685),
-        "13": (686, 1026),
-        "14": (1027, 1516),
-        "15": (1517, 1798),
-        "21": (1799, 2033),
-        "22": (2034, 2327),
-        "23": (2328, 2513),
-    }
+    # The PL acquisition used two incompatible segmentations. Duration
+    # signatures in both EEG and audio establish f1 overlaps at rows 254 and
+    # 1320. The m1 PL cohort has eight runs and never had run 15.
     ranges = (
-        m1_ra_ranges
+        _GARNETTDREAM_M1_RA_RUN_RANGES
         if paradigm == "reading_aloud" and variant == "m1"
-        else m1_pl_ranges
+        else _GARNETTDREAM_M1_PL_RUN_RANGES
         if variant == "m1"
-        else f1_ranges
+        else _GARNETTDREAM_F1_PL_RUN_RANGES
     )
     selected_range = ranges.get(run_id)
     if selected_range is None:
@@ -699,11 +710,11 @@ def _wav_duration(path: Path) -> float:
 def load_validated_littleprince_audio_spans(
     audio_root: str | Path,
     ce2_catalog: dict[str, list[MaterialUnit]],
-) -> tuple[dict[tuple[str, str], AudioSpan], dict[str, object]]:
+) -> tuple[dict[AudioSpanKey, AudioSpan], dict[str, object]]:
     """Validate PL audio evidence and map canonical row IDs to half-open spans."""
 
     root = Path(audio_root)
-    spans: dict[tuple[str, str], AudioSpan] = {}
+    spans: dict[AudioSpanKey, AudioSpan] = {}
     diagnostics: dict[str, object] = {}
     units = ce2_catalog["littleprince"]
     for speaker in ("f1", "m1"):
@@ -762,12 +773,179 @@ def load_validated_littleprince_audio_spans(
                 sort_keys=True,
                 separators=(",", ":"),
             )
-            spans[(speaker, unit.global_text_id)] = AudioSpan(
+            spans[(speaker, None, unit.global_text_id)] = AudioSpan(
                 audio_file=str(wavs[audio_index].resolve()),
                 start_sec=start_sec,
                 end_sec=end_sec,
                 evidence=evidence,
             )
+    return spans, diagnostics
+
+
+def load_validated_garnettdream_audio_spans(
+    audio_root: str | Path,
+    ce2_catalog: dict[str, list[MaterialUnit]],
+) -> tuple[dict[AudioSpanKey, AudioSpan], dict[str, object]]:
+    """Map GarnettDream PL audio within each acquisition segmentation.
+
+    The f1 and m1 cohorts used different run boundaries. ``ROWS_times`` and
+    ``ROWE_times`` are therefore grouped by their containing WAV first and are
+    only then paired with the reviewed material sequence for that cohort/run.
+    """
+
+    root = Path(audio_root)
+    spans: dict[AudioSpanKey, AudioSpan] = {}
+    diagnostics: dict[str, object] = {}
+    protocols = {
+        "f1": _GARNETTDREAM_F1_PL_RUN_RANGES,
+        "m1": _GARNETTDREAM_M1_PL_RUN_RANGES,
+    }
+    units = ce2_catalog["garnettdream"]
+
+    for speaker, run_ranges in protocols.items():
+        folder = root / f"garnettdream_{speaker}"
+        events_path = folder / "events_data.json"
+        data = json.loads(events_path.read_text(encoding="utf-8"))
+        audio_starts = [int(value) for value in data["begn_nonzero_indices"]]
+        row_starts = [int(value) for value in data["ROWS_times"]]
+        row_ends = [int(value) for value in data["ROWE_times"]]
+        wavs = sorted(
+            folder.glob("audio_*.wav"),
+            key=lambda path: int(path.stem.rsplit("_", 1)[-1]),
+        )
+        durations = [_wav_duration(path) for path in wavs]
+        pairs_by_audio: dict[int, list[EventPair]] = defaultdict(list)
+        for pair_index, (row_start, row_end) in enumerate(
+            zip(row_starts, row_ends)
+        ):
+            audio_index = bisect.bisect_right(audio_starts, row_start) - 1
+            pairs_by_audio[audio_index].append(
+                EventPair(
+                    start_sample=row_start,
+                    end_sample=row_end,
+                    pair_index=pair_index,
+                    preceding_chapter_event=None,
+                )
+            )
+
+        timeline_shape_valid = (
+            len(audio_starts) == len(wavs) + 1
+            and len(row_starts) == len(row_ends) + 1
+        )
+        variant_spans: dict[AudioSpanKey, AudioSpan] = {}
+        run_diagnostics: dict[str, object] = {}
+        all_runs_valid = True
+        for audio_index, (run_id, (first_row, last_row)) in enumerate(
+            run_ranges.items(),
+            start=1,
+        ):
+            run_units = _units_by_excel_range(units, first_row, last_row)
+            pairs = pairs_by_audio.get(audio_index, [])
+            sequence_valid, correlation, sequence_evidence = _duration_validation(
+                pairs,
+                run_units,
+                sampling_rate=_GARNETTDREAM_AUDIO_EVENT_RATE_HZ,
+                pace_sec=0.25,
+            )
+            count_valid = len(pairs) == len(run_units)
+            audio_file_valid = 0 <= audio_index < len(wavs)
+            boundary_invalid_count = 0
+            boundary_clamped_count = 0
+            candidate_spans: dict[AudioSpanKey, AudioSpan] = {}
+            if count_valid and audio_file_valid:
+                duration = durations[audio_index]
+                for pair, unit in zip(pairs, run_units):
+                    start_sec = (
+                        pair.start_sample - audio_starts[audio_index]
+                    ) / _GARNETTDREAM_AUDIO_EVENT_RATE_HZ
+                    raw_end_sec = (
+                        pair.end_sample - audio_starts[audio_index]
+                    ) / _GARNETTDREAM_AUDIO_EVENT_RATE_HZ
+                    if (
+                        start_sec < 0
+                        or start_sec >= duration
+                        or raw_end_sec <= start_sec
+                        or raw_end_sec
+                        > duration + _GARNETTDREAM_AUDIO_END_TOLERANCE_SEC
+                    ):
+                        boundary_invalid_count += 1
+                        continue
+                    end_sec = min(raw_end_sec, duration)
+                    was_clamped = end_sec != raw_end_sec
+                    boundary_clamped_count += int(was_clamped)
+                    evidence = json.dumps(
+                        {
+                            "version": GARNETTDREAM_AUDIO_ALIGNMENT_VERSION,
+                            "events_data": str(events_path.resolve()),
+                            "speaker": speaker,
+                            "run_id": run_id,
+                            "audio_index": audio_index,
+                            "canonical_excel_row": unit.source_excel_row,
+                            "duration_char_count_pearson": correlation,
+                            "end_clamped_to_wav_duration": was_clamped,
+                        },
+                        ensure_ascii=False,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    )
+                    candidate_spans[
+                        (speaker, run_id, unit.global_text_id)
+                    ] = AudioSpan(
+                        audio_file=str(wavs[audio_index].resolve()),
+                        start_sec=start_sec,
+                        end_sec=end_sec,
+                        evidence=evidence,
+                        method=GARNETTDREAM_AUDIO_ALIGNMENT_VERSION,
+                    )
+            run_valid = (
+                count_valid
+                and sequence_valid
+                and audio_file_valid
+                and boundary_invalid_count == 0
+                and len(candidate_spans) == len(run_units)
+            )
+            all_runs_valid = all_runs_valid and run_valid
+            if run_valid:
+                variant_spans.update(candidate_spans)
+            run_diagnostics[run_id] = {
+                "audio_index": audio_index,
+                "audio_file": (
+                    str(wavs[audio_index].resolve())
+                    if audio_file_valid
+                    else None
+                ),
+                "event_pair_count": len(pairs),
+                "text_unit_count": len(run_units),
+                "canonical_excel_row_range": [first_row, last_row],
+                "duration_char_count_pearson": correlation,
+                "sequence_evidence": json.loads(sequence_evidence),
+                "boundary_clamped_count": boundary_clamped_count,
+                "boundary_invalid_count": boundary_invalid_count,
+                "validated": run_valid,
+            }
+
+        validated = timeline_shape_valid and all_runs_valid
+        if validated:
+            spans.update(variant_spans)
+        protocol_audio_indices = set(range(1, len(run_ranges) + 1))
+        extra_counts = {
+            str(index): len(pairs)
+            for index, pairs in sorted(pairs_by_audio.items())
+            if index not in protocol_audio_indices
+        }
+        diagnostics[speaker] = {
+            "events_data": str(events_path.resolve()),
+            "wav_count": len(wavs),
+            "audio_start_count": len(audio_starts),
+            "row_start_count": len(row_starts),
+            "row_end_count": len(row_ends),
+            "timeline_shape_valid": timeline_shape_valid,
+            "protocol_run_ids": list(run_ranges),
+            "extra_audio_segment_event_counts": extra_counts,
+            "mapped_span_count": len(variant_spans) if validated else 0,
+            "runs": run_diagnostics,
+            "validated": validated,
+        }
     return spans, diagnostics
 
 
@@ -864,7 +1042,7 @@ def _yield_recording_records(
     spec: RecordingSpec,
     ce1_catalog: dict[tuple[str, str], list[MaterialUnit]],
     ce2_catalog: dict[str, list[MaterialUnit]],
-    audio_spans: dict[tuple[str, str], AudioSpan],
+    audio_spans: dict[AudioSpanKey, AudioSpan],
     anomaly_flags: dict[str, set[QualityFlag]],
     split_seed: int,
     diagnostics: dict[str, object],
@@ -999,8 +1177,12 @@ def _yield_recording_records(
             )
         elif spec.paradigm == "passive_listening":
             audio_alignment_method = "null_unverified"
-            if book_id == "littleprince" and unit is not None and speaker_id is not None:
-                audio_span = audio_spans.get((speaker_id, unit.global_text_id))
+            if unit is not None and speaker_id is not None:
+                audio_span = audio_spans.get(
+                    (speaker_id, run_id, unit.global_text_id)
+                ) or audio_spans.get(
+                    (speaker_id, None, unit.global_text_id)
+                )
             if audio_span is None:
                 flags.add(QualityFlag.PL_AUDIO_MAPPING_UNVERIFIED)
                 audio_alignment_evidence = (
@@ -1008,7 +1190,7 @@ def _yield_recording_records(
                     "event-sequence and duration-signature validation"
                 )
             else:
-                audio_alignment_method = AUDIO_ALIGNMENT_VERSION
+                audio_alignment_method = audio_span.method
                 audio_alignment_evidence = audio_span.evidence
 
         split_group_id, content_id = _split_identity(
@@ -1225,10 +1407,24 @@ def build_trial_manifest(
         ce2_catalog,
         override_path=override_path,
     )
-    audio_spans, audio_diagnostics = load_validated_littleprince_audio_spans(
-        paths.chineseeeg2_audio_root,
-        ce2_catalog,
+    audio_spans, littleprince_audio_diagnostics = (
+        load_validated_littleprince_audio_spans(
+            paths.chineseeeg2_audio_root,
+            ce2_catalog,
+        )
     )
+    garnettdream_audio_spans, garnettdream_audio_diagnostics = (
+        load_validated_garnettdream_audio_spans(
+            paths.chineseeeg2_audio_root,
+            ce2_catalog,
+        )
+    )
+    duplicate_audio_keys = set(audio_spans) & set(garnettdream_audio_spans)
+    if duplicate_audio_keys:
+        raise ValueError(
+            f"Duplicate PL audio span keys: {len(duplicate_audio_keys)}"
+        )
+    audio_spans.update(garnettdream_audio_spans)
     audit = json.loads(paths.audit_json.read_text(encoding="utf-8"))
     anomaly_maps = {
         "ChineseEEG1": _recording_anomaly_flags(audit, "chineseeeg1"),
@@ -1245,7 +1441,8 @@ def build_trial_manifest(
             book: dict(sorted(counts.items()))
             for book, counts in cross_dataset_status.items()
         },
-        "pl_littleprince_audio_validation": audio_diagnostics,
+        "pl_littleprince_audio_validation": littleprince_audio_diagnostics,
+        "pl_garnettdream_audio_validation": garnettdream_audio_diagnostics,
         "excluded_chapter_marker_pairs": 0,
         "recordings_without_legal_pairs": [],
         "unparsed_headers": [],

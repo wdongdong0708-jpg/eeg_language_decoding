@@ -28,7 +28,7 @@ def _require_artifacts() -> None:
 def test_real_pl_windows_are_exact_unpadded_and_protocol_disjoint() -> None:
     _require_artifacts()
     windows = load_pl_window_jsonl(WINDOWS)
-    assert len(windows) == 2_677
+    assert len(windows) == 7_565
     assert all(window.eeg_sample_count == 750 for window in windows)
     assert all(window.valid_eeg_samples == 750 for window in windows)
     assert all(window.padded_eeg_samples == 0 for window in windows)
@@ -48,17 +48,17 @@ def test_real_pl_window_accounting_and_sha_are_complete() -> None:
     _require_artifacts()
     audit = json.loads(AUDIT.read_text(encoding="utf-8"))
     assert audit["counts"] == {
-        "audio_target_count": 688,
-        "content_group_count": 346,
-        "excluded_record_count": 37_625,
+        "audio_target_count": 1_910,
+        "content_group_count": 999,
+        "excluded_record_count": 32_737,
         "input_pl_record_count": 40_302,
-        "records_with_windows": 2_677,
+        "records_with_windows": 7_565,
         "subject_group_count": 8,
-        "window_count": 2_677,
+        "window_count": 7_565,
         "window_counts_by_partition": {
-            "test": 295,
-            "train": 2_173,
-            "validation": 209,
+            "test": 851,
+            "train": 5_977,
+            "validation": 737,
         },
     }
     assert {
@@ -66,8 +66,8 @@ def test_real_pl_window_accounting_and_sha_are_complete() -> None:
         for reason, record_ids in audit["excluded_by_reason"].items()
     } == {
         "audio_bounds_exceed_file": 179,
-        "shorter_than_window_after_delay": 18_924,
-        "unverified_or_missing_audio_alignment": 18_522,
+        "shorter_than_window_after_delay": 32_525,
+        "unverified_or_missing_audio_alignment": 33,
     }
     assert audit["leakage_checks"] == {
         "all_windows_exact_length": True,
