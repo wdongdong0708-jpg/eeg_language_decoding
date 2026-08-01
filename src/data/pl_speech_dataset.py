@@ -64,9 +64,11 @@ class PLSpeechDataset(Dataset[dict[str, object]]):
         eeg_scaler: RecordingRobustScaler | None = None,
         speech_scaler: SpeechStandardScaler | None = None,
         expected_audio_model_id: str | None = None,
+        alignment_offset_ms: float = 0.0,
         eeg_reader: Callable[[str, int, int], np.ndarray] | None = None,
         require_all_features: bool = True,
         cache_speech_targets: bool = False,
+        subject_index_by_group: dict[str, int] | None = None,
     ) -> None:
         if partition not in {"train", "validation", "test"}:
             raise ValueError(f"Unknown partition: {partition}")
@@ -75,6 +77,20 @@ class PLSpeechDataset(Dataset[dict[str, object]]):
             if isinstance(windows, (str, Path))
             else list(windows)
         )
+        source_subjects = sorted({window.subject_group_id for window in source})
+        if subject_index_by_group is None:
+            subject_index_by_group = {
+                subject_group_id: index
+                for index, subject_group_id in enumerate(source_subjects)
+            }
+        if set(subject_index_by_group) != set(source_subjects):
+            raise ValueError(
+                "subject_index_by_group must cover every and only source subject"
+            )
+        indices = sorted(subject_index_by_group.values())
+        if indices != list(range(len(source_subjects))):
+            raise ValueError("Subject indices must be contiguous from zero")
+        self.subject_index_by_group = dict(subject_index_by_group)
         self.windows = sorted(
             (window for window in source if window.split == partition),
             key=lambda window: (
@@ -86,6 +102,21 @@ class PLSpeechDataset(Dataset[dict[str, object]]):
         )
         if not self.windows:
             raise ValueError(f"No PL speech windows for partition={partition}")
+        if alignment_offset_ms < 0:
+            raise ValueError("alignment_offset_ms must be non-negative")
+        sampling_rates = {
+            window.eeg_sampling_rate_hz for window in self.windows
+        }
+        if len(sampling_rates) != 1:
+            raise ValueError("Alignment crop requires one EEG sampling rate")
+        sampling_rate = next(iter(sampling_rates))
+        self.alignment_offset_samples = round(
+            alignment_offset_ms / 1000.0 * sampling_rate
+        )
+        if self.alignment_offset_samples >= min(
+            window.eeg_sample_count for window in self.windows
+        ):
+            raise ValueError("Alignment offset must be shorter than the window")
         if eeg_normalization not in {
             "none",
             "per_window_channel_zscore",
@@ -142,6 +173,8 @@ class PLSpeechDataset(Dataset[dict[str, object]]):
         elif self.eeg_normalization == "train_recording_robust_clamp":
             assert self.eeg_scaler is not None
             eeg = self.eeg_scaler.transform(window.eeg_file, eeg)
+        if self.alignment_offset_samples:
+            eeg = eeg[:, self.alignment_offset_samples :]
         if self.cache_speech_targets:
             speech_tensor = self.load_speech_target(window.audio_target_id)
             speech = speech_tensor.numpy()
@@ -158,6 +191,7 @@ class PLSpeechDataset(Dataset[dict[str, object]]):
             self._validate_audio_model(metadata, window.audio_target_id)
             if self.speech_scaler is not None:
                 speech = self.speech_scaler.transform(speech)
+            speech = self._crop_speech_target(speech)
         if speech.shape[1] != eeg.shape[1]:
             raise ValueError(
                 f"EEG/speech time mismatch for {window.window_id}: "
@@ -174,6 +208,7 @@ class PLSpeechDataset(Dataset[dict[str, object]]):
             "audio_target_id": window.audio_target_id,
             "split_group_id": window.split_group_id,
             "subject_group_id": window.subject_group_id,
+            "subject_index": self.subject_index_by_group[window.subject_group_id],
             "stimulus_position": window.stimulus_position,
         }
 
@@ -191,6 +226,7 @@ class PLSpeechDataset(Dataset[dict[str, object]]):
         self._validate_audio_model(metadata, audio_target_id)
         if self.speech_scaler is not None:
             speech = self.speech_scaler.transform(speech)
+        speech = self._crop_speech_target(speech)
         tensor = torch.from_numpy(np.ascontiguousarray(speech))
         self._speech_target_cache[audio_target_id] = tensor
         return tensor
@@ -211,6 +247,15 @@ class PLSpeechDataset(Dataset[dict[str, object]]):
                 f"Speech feature model mismatch for {audio_target_id}: "
                 f"{metadata.get('model_id')} != {self.expected_audio_model_id}"
             )
+
+    def _crop_speech_target(self, speech: np.ndarray) -> np.ndarray:
+        if not self.alignment_offset_samples:
+            return speech
+        if speech.shape[1] <= self.alignment_offset_samples:
+            raise ValueError(
+                "Alignment offset must be shorter than the speech target"
+            )
+        return speech[:, : -self.alignment_offset_samples]
 
 
 def _per_window_channel_zscore(

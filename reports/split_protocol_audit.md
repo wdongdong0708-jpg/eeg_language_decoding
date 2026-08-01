@@ -6,7 +6,7 @@ This audit covers protocol-level assignments only. It does not generate windows,
 
 - Manifest: `metadata/all_trials.parquet`
 - Rows: 168,156
-- Critical-field SHA-256: `7b0f92220c00e28648632e9b418a6cd5bd88b7ad832532f25ff0e35512778e0d`
+- Critical-field SHA-256: `0afc05cf298ab5409ee8d4806edad0b164378ce1417c3024353cd22da3fceccf`
 - Protocol seed: `42`
 - The manifest's embedded split is preserved and is not overwritten.
 
@@ -14,31 +14,31 @@ This audit covers protocol-level assignments only. It does not generate windows,
 
 | artifact | SHA-256 |
 |---|---|
-| `cross_paradigm_seed42.json` | `6eb0fa7a4effa2cf6118f1f1a65329698c603ac138772079550408e4b84084fe` |
-| `subject_text_unseen_seed42.json` | `acd0168be9d17a1a3cd0669ee26eeb28f698fd0a72d2a43b54f7edba7b840155` |
-| `text_unseen_seed42.json` | `f871511c49ac97a7911b88d9ac25084a8d6763ff659e1782840502769fe78b95` |
+| `cross_paradigm_seed42.json` | `806cd34b7fd9c1ae561db34c914b2d3c3608fce0937f2ac651040816fd774c01` |
+| `subject_text_unseen_seed42.json` | `c760f8ee49f623dde7886187d147c13b45d7f3520170736afcb26b39a9d18470` |
+| `text_unseen_seed42.json` | `559f25084bc02cc2f86375c393ccd71ad5b01102e62b6243bddd4627033ceaa1` |
 
 ## Setting A — unseen text, subjects visible
 
 | protocol | train trials/groups/subjects | validation trials/groups/subjects | test trials/groups/subjects | excluded |
 |---|---:|---:|---:|---:|
-| A | 134,859/13,381/22 | 16,413/1,614/22 | 16,884/1,684/22 | 0 |
+| A | 134,859/13,380/22 | 16,413/1,614/22 | 16,884/1,684/22 | 0 |
 
 - Train/test content overlap: 0
 - Train/test subject overlap (allowed): 22
-- Content-group ratios (train/validation/test): 80.227%/9.677%/10.097%
+- Content-group ratios (train/validation/test): 80.225%/9.677%/10.097%
 - Trial ratios (train/validation/test): 80.199%/9.761%/10.041%
 
 ## Setting B — unseen subjects and unseen text
 
 | protocol | train trials/groups/subjects | validation trials/groups/subjects | test trials/groups/subjects | excluded |
 |---|---:|---:|---:|---:|
-| B strict diagonal | 104,618/13,378/16 | 1,526/991/3 | 2,188/1,621/3 | 59,824 |
+| B strict diagonal | 104,618/13,376/16 | 1,526/991/3 | 2,188/1,621/3 | 59,824 |
 
 - Train/test content overlap: 0
 - Train/test subject overlap: 0
 - Off-diagonal excluded trials: 59,824
-- Content-group assignment ratios (train/validation/test): 80.227%/9.677%/10.097%
+- Content-group assignment ratios (train/validation/test): 80.225%/9.677%/10.097%
 - Selected-trial distribution (train/validation/test): 96.572%/1.409%/2.020%
 
 ### Subject cohort quotas
@@ -64,12 +64,12 @@ This audit covers protocol-level assignments only. It does not generate windows,
 
 | protocol | train trials/groups/subjects | validation trials/groups/subjects | test trials/groups/subjects | excluded |
 |---|---:|---:|---:|---:|
-| pl_to_silent_reading_unseen_text: passive_listening → silent_reading | 32,279/3,970/8 | 3,777/466/8 | 10,640/1,192/10 | 121,460 |
+| pl_to_silent_reading_unseen_text: passive_listening → silent_reading | 32,283/3,970/8 | 3,777/466/8 | 10,640/1,192/10 | 121,456 |
 | silent_reading_to_pl_unseen_text: silent_reading → passive_listening | 85,944/9,612/10 | 10,685/1,179/10 | 4,129/518/8 | 67,398 |
-| pl_silent_reading_to_ra_unseen_text: passive_listening,silent_reading → reading_aloud | 118,223/13,362/18 | 14,462/1,612/18 | 2,095/518/4 | 33,376 |
+| pl_silent_reading_to_ra_unseen_text: passive_listening,silent_reading → reading_aloud | 118,227/13,362/18 | 14,462/1,612/18 | 2,095/518/4 | 33,372 |
 
 Selected-trial train/validation/test distributions:
-- `pl_to_silent_reading_unseen_text`: 69.126%/8.088%/22.786%
+- `pl_to_silent_reading_unseen_text`: 69.128%/8.088%/22.784%
 - `silent_reading_to_pl_unseen_text`: 85.297%/10.605%/4.098%
 - `pl_silent_reading_to_ra_unseen_text`: 87.716%/10.730%/1.554%
 
@@ -80,8 +80,8 @@ Every main protocol has zero target-paradigm trials in train/validation and zero
 | mask | content groups | manifest trials in groups |
 |---|---:|---:|
 | `fuzzy_global_alignment_group_excluded_from_strict_main` | 15 | 300 |
-| `missing_text_group_excluded_from_strict_main` | 7 | 28 |
-| `material_variant_uncertain_group_excluded_from_strict_main` | 4 | 12 |
+| `missing_text_group_excluded_from_strict_main` | 6 | 21 |
+| `material_variant_uncertain_group_excluded_from_strict_main` | 3 | 5 |
 
 ## Quality and alignment treatment
 

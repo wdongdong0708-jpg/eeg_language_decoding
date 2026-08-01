@@ -16,6 +16,7 @@ from data.pl_speech_scaling import (
     SpeechStandardScaler,
 )
 from evaluation.speech_retrieval import evaluate_speech_retrieval
+from evaluation.retrieval_metrics import expected_random_retrieval_metrics
 from models.eeg_encoder import build_eeg_encoder
 from models.losses import ClipContrastiveLoss
 from models.retrieval_model import EEGSpeechRetrievalModel
@@ -26,6 +27,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--training-report", required=True)
     parser.add_argument("--checkpoint", required=True)
     parser.add_argument("--partition", default="test")
+    parser.add_argument("--window-index")
     parser.add_argument("--output", required=True)
     parser.add_argument("--device")
     parser.add_argument("--allow-overwrite", action="store_true")
@@ -47,6 +49,15 @@ def main() -> None:
         Path(args.training_report).read_text(encoding="utf-8")
     )
     config = training_report["config"]
+    evaluation_window_index = (
+        args.window_index or training_report["window_index"]
+    )
+    alignment_offset_ms = float(
+        training_report.get("alignment", {}).get(
+            "offset_ms",
+            config["window"].get("alignment_offset_ms", 0.0),
+        )
+    )
     device = torch.device(
         args.device
         or config.get("device")
@@ -58,6 +69,13 @@ def main() -> None:
         weights_only=True,
     )
     preprocessing_state = checkpoint.get("preprocessing_state", {})
+    subject_index_by_group = checkpoint.get("subject_index_by_group")
+    if subject_index_by_group is None:
+        subject_index_by_group = training_report.get("subjects", {}).get(
+            "index_by_group"
+        )
+    if config["model"].get("subject_layer") and subject_index_by_group is None:
+        raise ValueError("Subject-layer checkpoint is missing its subject mapping")
     eeg_scaler_state = preprocessing_state.get("eeg")
     speech_scaler_state = preprocessing_state.get("speech")
     eeg_scaler = (
@@ -71,7 +89,7 @@ def main() -> None:
         else None
     )
     dataset = PLSpeechDataset(
-        training_report["window_index"],
+        evaluation_window_index,
         partition=args.partition,
         feature_dir=training_report.get(
             "audio_feature_dir",
@@ -81,14 +99,22 @@ def main() -> None:
         eeg_scaler=eeg_scaler,
         speech_scaler=speech_scaler,
         expected_audio_model_id=config["audio_target"]["model_id"],
+        alignment_offset_ms=alignment_offset_ms,
         cache_speech_targets=True,
+        subject_index_by_group=subject_index_by_group,
     )
+    source_delays = {window.eeg_delay_ms for window in dataset.windows}
+    if alignment_offset_ms and source_delays != {0.0}:
+        raise ValueError(
+            "Internal alignment crop requires a zero-delay window index"
+        )
     sample = dataset[0]
     encoder_config = config["model"]
     encoder = build_eeg_encoder(
         encoder_config,
         input_channels=int(sample["eeg"].shape[0]),
         output_channels=int(sample["speech"].shape[0]),
+        n_subjects=len(dataset.subject_index_by_group),
     )
     loss_config = config["loss"]
     model = EEGSpeechRetrievalModel(
@@ -116,6 +142,10 @@ def main() -> None:
         norm_kind=loss_config["norm_kind"],
         position_pool_size=pool_size,
     )
+    random_global = expected_random_retrieval_metrics(candidate_count)
+    random_position_local = expected_random_retrieval_metrics(
+        pool_size
+    )
     report = {
         "schema_version": "pl-speech-checkpoint-evaluation-v1",
         "partition": args.partition,
@@ -123,15 +153,24 @@ def main() -> None:
         "training_report_sha256": _sha256(args.training_report),
         "checkpoint": Path(args.checkpoint).as_posix(),
         "checkpoint_sha256": _sha256(args.checkpoint),
-        "window_index": training_report["window_index"],
-        "window_index_sha256": training_report["window_index_sha256"],
+        "training_window_index": training_report["window_index"],
+        "window_index": str(evaluation_window_index),
+        "window_index_sha256": _sha256(evaluation_window_index),
         "active_eeg_delay_ms": training_report["active_eeg_delay_ms"],
+        "alignment": training_report.get("alignment"),
         "query_count": len(ranks["global"]),
         "candidate_count": candidate_count,
         "position_local_pool_size": pool_size,
         "tie_policy": "pessimistic",
         "metrics": {
             name: asdict(value) for name, value in metrics.items()
+        },
+        "random_baseline": {
+            "method": "analytical_uniform_random_ranking",
+            "global": asdict(random_global),
+            "position_local": asdict(random_position_local),
+            "candidate_count": candidate_count,
+            "position_local_pool_size": pool_size,
         },
     }
     output.parent.mkdir(parents=True, exist_ok=True)

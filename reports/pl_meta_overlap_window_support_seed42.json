@@ -1,0 +1,130 @@
+{
+  "common_support_artifacts": {
+    "0.0": {
+      "audio_target_count": 508,
+      "content_group_count": 156,
+      "partition_counts": {
+        "test": 231,
+        "train": 1571,
+        "validation": 182
+      },
+      "path": "experiments/pl_meta_overlap_windows/windows_delay_000ms_common.jsonl",
+      "sha256": "58a0cb74b096b4023816a649b1c030eeff0c625b1a8f5f9d011025f9159275b7",
+      "window_count": 1984
+    },
+    "100.0": {
+      "audio_target_count": 508,
+      "content_group_count": 156,
+      "partition_counts": {
+        "test": 231,
+        "train": 1571,
+        "validation": 182
+      },
+      "path": "experiments/pl_meta_overlap_windows/windows_delay_100ms_common.jsonl",
+      "sha256": "2fe8e551cf2bd7d382837a1c669f9b9a7bf2878dfd943d03c9ffb1c80da9b940",
+      "window_count": 1984
+    },
+    "200.0": {
+      "audio_target_count": 508,
+      "content_group_count": 156,
+      "partition_counts": {
+        "test": 231,
+        "train": 1571,
+        "validation": 182
+      },
+      "path": "experiments/pl_meta_overlap_windows/windows_delay_200ms_common.jsonl",
+      "sha256": "3e68b8a4c781678711c52149f36be4ab70a1368fae209ae24a93b86f0209c88e",
+      "window_count": 1984
+    },
+    "300.0": {
+      "audio_target_count": 508,
+      "content_group_count": 156,
+      "partition_counts": {
+        "test": 231,
+        "train": 1571,
+        "validation": 182
+      },
+      "path": "experiments/pl_meta_overlap_windows/windows_delay_300ms_common.jsonl",
+      "sha256": "52963c30acaea6e93683a1ae7f56d6729b7663913c29a877c26fe7fbd1dd772c",
+      "window_count": 1984
+    },
+    "400.0": {
+      "audio_target_count": 508,
+      "content_group_count": 156,
+      "partition_counts": {
+        "test": 231,
+        "train": 1571,
+        "validation": 182
+      },
+      "path": "experiments/pl_meta_overlap_windows/windows_delay_400ms_common.jsonl",
+      "sha256": "b2cf8fd7d97d6eadf5013470d41b18d1f8b08fe119f73e1706ea2d3292b57266",
+      "window_count": 1984
+    },
+    "500.0": {
+      "audio_target_count": 508,
+      "content_group_count": 156,
+      "partition_counts": {
+        "test": 231,
+        "train": 1571,
+        "validation": 182
+      },
+      "path": "experiments/pl_meta_overlap_windows/windows_delay_500ms_common.jsonl",
+      "sha256": "a522746f4738a0fd2ef6ebe0744209158556f0a747c6804c1c8fcdde55a734ba",
+      "window_count": 1984
+    }
+  },
+  "common_support_window_count": 1984,
+  "config": "configs/experiment/pl_speech_retrieval_meta_no_subject_overlap.yaml",
+  "delays_ms": [
+    0.0,
+    100.0,
+    200.0,
+    300.0,
+    400.0,
+    500.0
+  ],
+  "raw_exclusion_counts": {
+    "0.0": {
+      "audio_bounds_exceed_file": 179,
+      "shorter_than_window_after_delay": 18924,
+      "unverified_or_missing_audio_alignment": 18522
+    },
+    "100.0": {
+      "audio_bounds_exceed_file": 179,
+      "shorter_than_window_after_delay": 18943,
+      "unverified_or_missing_audio_alignment": 18522
+    },
+    "200.0": {
+      "audio_bounds_exceed_file": 179,
+      "shorter_than_window_after_delay": 19020,
+      "unverified_or_missing_audio_alignment": 18522
+    },
+    "300.0": {
+      "audio_bounds_exceed_file": 179,
+      "shorter_than_window_after_delay": 19779,
+      "unverified_or_missing_audio_alignment": 18522
+    },
+    "400.0": {
+      "audio_bounds_exceed_file": 179,
+      "shorter_than_window_after_delay": 19790,
+      "unverified_or_missing_audio_alignment": 18522
+    },
+    "500.0": {
+      "audio_bounds_exceed_file": 179,
+      "shorter_than_window_after_delay": 20384,
+      "unverified_or_missing_audio_alignment": 18522
+    }
+  },
+  "raw_window_counts": {
+    "0.0": 4661,
+    "100.0": 4631,
+    "200.0": 4425,
+    "300.0": 3118,
+    "400.0": 3103,
+    "500.0": 1984
+  },
+  "schema_version": "pl-delay-common-support-v1",
+  "scientific_reason": "Every delay is trained and validated on identical record/audio/window units; otherwise longer delays would be compared on a shorter, biased eligibility subset.",
+  "selection_partition": "validation",
+  "test_evaluated_during_delay_selection": false
+}

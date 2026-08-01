@@ -153,12 +153,14 @@ def evaluate_speech_retrieval(
         if max_queries is not None and query_count >= max_queries:
             break
         eeg = batch["eeg"].to(device)
+        subject_indices = batch["subject_index"].to(device)
         if max_queries is not None:
             remaining = max_queries - query_count
             eeg = eeg[:remaining]
+            subject_indices = subject_indices[:remaining]
             batch["audio_target_id"] = batch["audio_target_id"][:remaining]
             batch["stimulus_position"] = batch["stimulus_position"][:remaining]
-        estimates = model(eeg)
+        estimates = model(eeg, subject_indices)
         score_chunks: list[torch.Tensor] = []
         for start in range(0, len(candidate_ids), candidate_batch_size):
             chunk_ids = candidate_ids[start : start + candidate_batch_size]

@@ -1,8 +1,8 @@
 {
   "artifact_sha256": {
-    "cross_paradigm_seed42.json": "6eb0fa7a4effa2cf6118f1f1a65329698c603ac138772079550408e4b84084fe",
-    "subject_text_unseen_seed42.json": "acd0168be9d17a1a3cd0669ee26eeb28f698fd0a72d2a43b54f7edba7b840155",
-    "text_unseen_seed42.json": "f871511c49ac97a7911b88d9ac25084a8d6763ff659e1782840502769fe78b95"
+    "cross_paradigm_seed42.json": "806cd34b7fd9c1ae561db34c914b2d3c3608fce0937f2ac651040816fd774c01",
+    "subject_text_unseen_seed42.json": "c760f8ee49f623dde7886187d147c13b45d7f3520170736afcb26b39a9d18470",
+    "text_unseen_seed42.json": "559f25084bc02cc2f86375c393ccd71ad5b01102e62b6243bddd4627033ceaa1"
   },
   "manifest_critical_field_fingerprint": {
     "algorithm": "sha256",
@@ -18,7 +18,7 @@
     ],
     "row_order": "physical manifest row order",
     "row_separator_hex": "0a",
-    "sha256": "7b0f92220c00e28648632e9b418a6cd5bd88b7ad832532f25ff0e35512778e0d",
+    "sha256": "0afc05cf298ab5409ee8d4806edad0b164378ce1417c3024353cd22da3fceccf",
     "value_separator_hex": "1f"
   },
   "manifest_path": "metadata/all_trials.parquet",
@@ -43,9 +43,9 @@
   "setting_a": {
     "actual_ratios": {
       "all_content_groups": {
-        "test": 0.10096528568859044,
-        "train": 0.8022663229210384,
-        "validation": 0.09676839139037112
+        "test": 0.10097133948914738,
+        "train": 0.8022544669624655,
+        "validation": 0.0967741935483871
       },
       "selected_trial_distribution": {
         "test": 0.10040676514664953,
@@ -61,14 +61,14 @@
     "counts": {
       "all_content_assignment_group_counts": {
         "test": 1684,
-        "train": 13381,
+        "train": 13380,
         "validation": 1614
       },
-      "all_content_group_count": 16679,
+      "all_content_group_count": 16678,
       "all_subject_group_count": 22,
       "content_group_counts_in_selected": {
         "test": 1684,
-        "train": 13381,
+        "train": 13380,
         "validation": 1614
       },
       "excluded_trial_count": 0,
@@ -115,11 +115,10 @@
           "missing_text_trial_count": 0,
           "quality_flag_trial_counts": {
             "broken_brainvision_reference": 8612,
-            "event_text_count_mismatch": 499,
+            "event_text_count_mismatch": 310,
             "events_vmrk_count_mismatch": 6,
-            "ok": 2159,
+            "ok": 3969,
             "orphan_row_event_in_recording": 717,
-            "pl_audio_mapping_unverified": 1880,
             "ra_audio_boundary_unavailable": 2099,
             "unresolved_text_alignment": 10422
           },
@@ -129,24 +128,24 @@
         "train": {
           "fuzzy_global_alignment_trial_count": 106,
           "implausible_eeg_trial_duration_trial_count": 7,
-          "material_variant_uncertain_trial_count": 12,
-          "missing_text_trial_count": 28,
+          "material_variant_uncertain_trial_count": 5,
+          "missing_text_trial_count": 21,
           "quality_flag_trial_counts": {
             "broken_brainvision_reference": 69174,
-            "event_text_count_mismatch": 3664,
+            "event_text_count_mismatch": 2355,
             "events_vmrk_count_mismatch": 34,
             "implausible_eeg_trial_duration": 7,
-            "material_variant_uncertain": 12,
-            "missing_text": 28,
-            "ok": 16896,
+            "material_variant_uncertain": 5,
+            "missing_text": 21,
+            "ok": 31228,
             "orphan_row_event_in_recording": 4922,
-            "pl_audio_mapping_unverified": 14898,
+            "pl_audio_mapping_unverified": 21,
             "prechapter_trial_unresolved": 14,
             "ra_audio_boundary_unavailable": 16423,
-            "unresolved_text_alignment": 84078
+            "unresolved_text_alignment": 84071
           },
           "trial_count": 134859,
-          "unresolved_global_alignment_trial_count": 84078
+          "unresolved_global_alignment_trial_count": 84071
         },
         "validation": {
           "fuzzy_global_alignment_trial_count": 17,
@@ -155,12 +154,12 @@
           "missing_text_trial_count": 0,
           "quality_flag_trial_counts": {
             "broken_brainvision_reference": 8478,
-            "event_text_count_mismatch": 398,
+            "event_text_count_mismatch": 286,
             "events_vmrk_count_mismatch": 1,
             "implausible_eeg_trial_duration": 1,
-            "ok": 2045,
+            "ok": 3730,
             "orphan_row_event_in_recording": 662,
-            "pl_audio_mapping_unverified": 1744,
+            "pl_audio_mapping_unverified": 12,
             "ra_audio_boundary_unavailable": 1918,
             "unresolved_text_alignment": 10414
           },
@@ -173,9 +172,9 @@
   "setting_b": {
     "actual_ratios": {
       "all_content_groups": {
-        "test": 0.10096528568859044,
-        "train": 0.8022663229210384,
-        "validation": 0.09676839139037112
+        "test": 0.10097133948914738,
+        "train": 0.8022544669624655,
+        "validation": 0.0967741935483871
       },
       "selected_trial_distribution": {
         "test": 0.020197171657497324,
@@ -191,14 +190,14 @@
     "counts": {
       "all_content_assignment_group_counts": {
         "test": 1684,
-        "train": 13381,
+        "train": 13380,
         "validation": 1614
       },
-      "all_content_group_count": 16679,
+      "all_content_group_count": 16678,
       "all_subject_group_count": 22,
       "content_group_counts_in_selected": {
         "test": 1621,
-        "train": 13378,
+        "train": 13376,
         "validation": 991
       },
       "excluded_trial_count": 59824,
@@ -244,24 +243,24 @@
       "excluded": {
         "fuzzy_global_alignment_trial_count": 37,
         "implausible_eeg_trial_duration_trial_count": 5,
-        "material_variant_uncertain_trial_count": 5,
-        "missing_text_trial_count": 9,
+        "material_variant_uncertain_trial_count": 3,
+        "missing_text_trial_count": 7,
         "quality_flag_trial_counts": {
           "broken_brainvision_reference": 27237,
-          "event_text_count_mismatch": 1905,
+          "event_text_count_mismatch": 1273,
           "events_vmrk_count_mismatch": 7,
           "implausible_eeg_trial_duration": 5,
-          "material_variant_uncertain": 5,
-          "missing_text": 9,
-          "ok": 7950,
+          "material_variant_uncertain": 3,
+          "missing_text": 7,
+          "ok": 14601,
           "orphan_row_event_in_recording": 2311,
-          "pl_audio_mapping_unverified": 6897,
+          "pl_audio_mapping_unverified": 18,
           "prechapter_trial_unresolved": 2,
           "ra_audio_boundary_unavailable": 11442,
-          "unresolved_text_alignment": 32479
+          "unresolved_text_alignment": 32477
         },
         "trial_count": 59824,
-        "unresolved_global_alignment_trial_count": 32479
+        "unresolved_global_alignment_trial_count": 32477
       },
       "policy": "quality-independent protocol construction; no quality_flag filtering",
       "selected": {
@@ -272,10 +271,9 @@
           "missing_text_trial_count": 0,
           "quality_flag_trial_counts": {
             "broken_brainvision_reference": 899,
-            "event_text_count_mismatch": 67,
-            "ok": 283,
+            "event_text_count_mismatch": 40,
+            "ok": 475,
             "orphan_row_event_in_recording": 88,
-            "pl_audio_mapping_unverified": 216,
             "ra_audio_boundary_unavailable": 545,
             "unresolved_text_alignment": 1111
           },
@@ -285,24 +283,24 @@
         "train": {
           "fuzzy_global_alignment_trial_count": 93,
           "implausible_eeg_trial_duration_trial_count": 3,
-          "material_variant_uncertain_trial_count": 7,
-          "missing_text_trial_count": 19,
+          "material_variant_uncertain_trial_count": 2,
+          "missing_text_trial_count": 14,
           "quality_flag_trial_counts": {
             "broken_brainvision_reference": 57594,
-            "event_text_count_mismatch": 2517,
+            "event_text_count_mismatch": 1582,
             "events_vmrk_count_mismatch": 34,
             "implausible_eeg_trial_duration": 3,
-            "material_variant_uncertain": 7,
-            "missing_text": 19,
-            "ok": 12616,
+            "material_variant_uncertain": 2,
+            "missing_text": 14,
+            "ok": 23365,
             "orphan_row_event_in_recording": 3846,
-            "pl_audio_mapping_unverified": 11173,
+            "pl_audio_mapping_unverified": 14,
             "prechapter_trial_unresolved": 12,
             "ra_audio_boundary_unavailable": 7961,
-            "unresolved_text_alignment": 70794
+            "unresolved_text_alignment": 70789
           },
           "trial_count": 104618,
-          "unresolved_global_alignment_trial_count": 70794
+          "unresolved_global_alignment_trial_count": 70789
         },
         "validation": {
           "fuzzy_global_alignment_trial_count": 0,
@@ -311,10 +309,10 @@
           "missing_text_trial_count": 0,
           "quality_flag_trial_counts": {
             "broken_brainvision_reference": 534,
-            "event_text_count_mismatch": 72,
-            "ok": 251,
+            "event_text_count_mismatch": 56,
+            "ok": 486,
             "orphan_row_event_in_recording": 56,
-            "pl_audio_mapping_unverified": 236,
+            "pl_audio_mapping_unverified": 1,
             "ra_audio_boundary_unavailable": 492,
             "unresolved_text_alignment": 530
           },
@@ -403,37 +401,37 @@
       "pl_silent_reading_to_ra_unseen_text": {
         "actual_ratios": {
           "all_content_groups": {
-            "test": 0.10096528568859044,
-            "train": 0.8022663229210384,
-            "validation": 0.09676839139037112
+            "test": 0.10097133948914738,
+            "train": 0.8022544669624655,
+            "validation": 0.0967741935483871
           },
           "selected_trial_distribution": {
-            "test": 0.01554384923579166,
-            "train": 0.8771553642973735,
-            "validation": 0.10730078646683484
+            "test": 0.015543387939221272,
+            "train": 0.87715900997151,
+            "validation": 0.10729760208926875
           },
           "selected_trials_over_manifest": {
             "test": 0.012458669330859441,
-            "train": 0.7030554960869668,
+            "train": 0.7030792835224434,
             "validation": 0.08600347296557959
           }
         },
         "counts": {
           "all_content_assignment_group_counts": {
             "test": 1684,
-            "train": 13381,
+            "train": 13380,
             "validation": 1614
           },
-          "all_content_group_count": 16679,
+          "all_content_group_count": 16678,
           "all_subject_group_count": 22,
           "content_group_counts_in_selected": {
             "test": 518,
             "train": 13362,
             "validation": 1612
           },
-          "excluded_trial_count": 33376,
+          "excluded_trial_count": 33372,
           "manifest_trial_count": 168156,
-          "selected_trial_count": 134780,
+          "selected_trial_count": 134784,
           "subject_group_counts_in_selected": {
             "test": 4,
             "train": 18,
@@ -441,15 +439,15 @@
           },
           "trial_counts": {
             "test": 2095,
-            "train": 118223,
+            "train": 118227,
             "validation": 14462
           }
         },
         "excluded_reason_counts": {
           "fuzzy_global_alignment_group_excluded_from_strict_main": 300,
-          "missing_text_group_excluded_from_strict_main": 28,
+          "missing_text_group_excluded_from_strict_main": 21,
           "source_paradigm_test_content_excluded": 14769,
-          "target_paradigm_non_test_content_excluded": 18279
+          "target_paradigm_non_test_content_excluded": 18282
         },
         "leakage_checks": {
           "all_partition_split_group_intersection_count": 0,
@@ -465,24 +463,24 @@
           "excluded": {
             "fuzzy_global_alignment_trial_count": 131,
             "implausible_eeg_trial_duration_trial_count": 3,
-            "material_variant_uncertain_trial_count": 12,
-            "missing_text_trial_count": 28,
+            "material_variant_uncertain_trial_count": 5,
+            "missing_text_trial_count": 21,
             "quality_flag_trial_counts": {
               "broken_brainvision_reference": 8622,
-              "event_text_count_mismatch": 1561,
+              "event_text_count_mismatch": 844,
               "events_vmrk_count_mismatch": 6,
               "implausible_eeg_trial_duration": 3,
-              "material_variant_uncertain": 12,
-              "missing_text": 28,
-              "ok": 2362,
+              "material_variant_uncertain": 5,
+              "missing_text": 21,
+              "ok": 4176,
               "orphan_row_event_in_recording": 1429,
-              "pl_audio_mapping_unverified": 1890,
+              "pl_audio_mapping_unverified": 2,
               "prechapter_trial_unresolved": 14,
               "ra_audio_boundary_unavailable": 18345,
-              "unresolved_text_alignment": 10450
+              "unresolved_text_alignment": 10443
             },
-            "trial_count": 33376,
-            "unresolved_global_alignment_trial_count": 10450
+            "trial_count": 33372,
+            "unresolved_global_alignment_trial_count": 10443
           },
           "policy": "quality-independent protocol construction; no quality_flag filtering",
           "selected": {
@@ -492,7 +490,7 @@
               "material_variant_uncertain_trial_count": 0,
               "missing_text_trial_count": 0,
               "quality_flag_trial_counts": {
-                "event_text_count_mismatch": 161,
+                "event_text_count_mismatch": 80,
                 "orphan_row_event_in_recording": 102,
                 "ra_audio_boundary_unavailable": 2095
               },
@@ -506,15 +504,15 @@
               "missing_text_trial_count": 0,
               "quality_flag_trial_counts": {
                 "broken_brainvision_reference": 69164,
-                "event_text_count_mismatch": 2558,
+                "event_text_count_mismatch": 1810,
                 "events_vmrk_count_mismatch": 34,
                 "implausible_eeg_trial_duration": 4,
-                "ok": 16724,
+                "ok": 31052,
                 "orphan_row_event_in_recording": 4201,
-                "pl_audio_mapping_unverified": 14888,
+                "pl_audio_mapping_unverified": 19,
                 "unresolved_text_alignment": 84050
               },
-              "trial_count": 118223,
+              "trial_count": 118227,
               "unresolved_global_alignment_trial_count": 84050
             },
             "validation": {
@@ -524,12 +522,12 @@
               "missing_text_trial_count": 0,
               "quality_flag_trial_counts": {
                 "broken_brainvision_reference": 8478,
-                "event_text_count_mismatch": 281,
+                "event_text_count_mismatch": 217,
                 "events_vmrk_count_mismatch": 1,
                 "implausible_eeg_trial_duration": 1,
-                "ok": 2014,
+                "ok": 3699,
                 "orphan_row_event_in_recording": 569,
-                "pl_audio_mapping_unverified": 1744,
+                "pl_audio_mapping_unverified": 12,
                 "unresolved_text_alignment": 10414
               },
               "trial_count": 14462,
@@ -546,37 +544,37 @@
       "pl_to_silent_reading_unseen_text": {
         "actual_ratios": {
           "all_content_groups": {
-            "test": 0.10096528568859044,
-            "train": 0.8022663229210384,
-            "validation": 0.09676839139037112
+            "test": 0.10097133948914738,
+            "train": 0.8022544669624655,
+            "validation": 0.0967741935483871
           },
           "selected_trial_distribution": {
-            "test": 0.22785677574096283,
-            "train": 0.6912583518930958,
-            "validation": 0.08088487236594141
+            "test": 0.2278372591006424,
+            "train": 0.6912847965738758,
+            "validation": 0.0808779443254818
           },
           "selected_trials_over_manifest": {
             "test": 0.06327457836770618,
-            "train": 0.1919586574371417,
+            "train": 0.19198244487261829,
             "validation": 0.022461285948761865
           }
         },
         "counts": {
           "all_content_assignment_group_counts": {
             "test": 1684,
-            "train": 13381,
+            "train": 13380,
             "validation": 1614
           },
-          "all_content_group_count": 16679,
+          "all_content_group_count": 16678,
           "all_subject_group_count": 22,
           "content_group_counts_in_selected": {
             "test": 1192,
             "train": 3970,
             "validation": 466
           },
-          "excluded_trial_count": 121460,
+          "excluded_trial_count": 121456,
           "manifest_trial_count": 168156,
-          "selected_trial_count": 46696,
+          "selected_trial_count": 46700,
           "subject_group_counts_in_selected": {
             "test": 10,
             "train": 8,
@@ -584,14 +582,14 @@
           },
           "trial_counts": {
             "test": 10640,
-            "train": 32279,
+            "train": 32283,
             "validation": 3777
           }
         },
         "excluded_reason_counts": {
           "fuzzy_global_alignment_group_excluded_from_strict_main": 300,
-          "missing_text_group_excluded_from_strict_main": 28,
-          "paradigm_out_of_protocol_scope": 20374,
+          "missing_text_group_excluded_from_strict_main": 21,
+          "paradigm_out_of_protocol_scope": 20377,
           "source_paradigm_test_content_excluded": 4129,
           "target_paradigm_non_test_content_excluded": 96629
         },
@@ -609,24 +607,24 @@
           "excluded": {
             "fuzzy_global_alignment_trial_count": 131,
             "implausible_eeg_trial_duration_trial_count": 3,
-            "material_variant_uncertain_trial_count": 12,
-            "missing_text_trial_count": 28,
+            "material_variant_uncertain_trial_count": 5,
+            "missing_text_trial_count": 21,
             "quality_flag_trial_counts": {
               "broken_brainvision_reference": 77652,
-              "event_text_count_mismatch": 1722,
+              "event_text_count_mismatch": 924,
               "events_vmrk_count_mismatch": 6,
               "implausible_eeg_trial_duration": 3,
-              "material_variant_uncertain": 12,
-              "missing_text": 28,
-              "ok": 3081,
+              "material_variant_uncertain": 5,
+              "missing_text": 21,
+              "ok": 4895,
               "orphan_row_event_in_recording": 3899,
-              "pl_audio_mapping_unverified": 1890,
+              "pl_audio_mapping_unverified": 2,
               "prechapter_trial_unresolved": 14,
               "ra_audio_boundary_unavailable": 20440,
-              "unresolved_text_alignment": 94492
+              "unresolved_text_alignment": 94485
             },
-            "trial_count": 121460,
-            "unresolved_global_alignment_trial_count": 94492
+            "trial_count": 121456,
+            "unresolved_global_alignment_trial_count": 94485
           },
           "policy": "quality-independent protocol construction; no quality_flag filtering",
           "selected": {
@@ -650,14 +648,14 @@
               "material_variant_uncertain_trial_count": 0,
               "missing_text_trial_count": 0,
               "quality_flag_trial_counts": {
-                "event_text_count_mismatch": 2558,
+                "event_text_count_mismatch": 1810,
                 "events_vmrk_count_mismatch": 34,
                 "implausible_eeg_trial_duration": 4,
-                "ok": 16089,
+                "ok": 30417,
                 "orphan_row_event_in_recording": 1809,
-                "pl_audio_mapping_unverified": 14888
+                "pl_audio_mapping_unverified": 19
               },
-              "trial_count": 32279,
+              "trial_count": 32283,
               "unresolved_global_alignment_trial_count": 0
             },
             "validation": {
@@ -666,12 +664,12 @@
               "material_variant_uncertain_trial_count": 0,
               "missing_text_trial_count": 0,
               "quality_flag_trial_counts": {
-                "event_text_count_mismatch": 281,
+                "event_text_count_mismatch": 217,
                 "events_vmrk_count_mismatch": 1,
                 "implausible_eeg_trial_duration": 1,
-                "ok": 1862,
+                "ok": 3547,
                 "orphan_row_event_in_recording": 217,
-                "pl_audio_mapping_unverified": 1744
+                "pl_audio_mapping_unverified": 12
               },
               "trial_count": 3777,
               "unresolved_global_alignment_trial_count": 0
@@ -686,9 +684,9 @@
       "silent_reading_to_pl_unseen_text": {
         "actual_ratios": {
           "all_content_groups": {
-            "test": 0.10096528568859044,
-            "train": 0.8022663229210384,
-            "validation": 0.09676839139037112
+            "test": 0.10097133948914738,
+            "train": 0.8022544669624655,
+            "validation": 0.0967741935483871
           },
           "selected_trial_distribution": {
             "test": 0.04097937632743802,
@@ -704,10 +702,10 @@
         "counts": {
           "all_content_assignment_group_counts": {
             "test": 1684,
-            "train": 13381,
+            "train": 13380,
             "validation": 1614
           },
-          "all_content_group_count": 16679,
+          "all_content_group_count": 16678,
           "all_subject_group_count": 22,
           "content_group_counts_in_selected": {
             "test": 518,
@@ -730,10 +728,10 @@
         },
         "excluded_reason_counts": {
           "fuzzy_global_alignment_group_excluded_from_strict_main": 300,
-          "missing_text_group_excluded_from_strict_main": 28,
-          "paradigm_out_of_protocol_scope": 20374,
+          "missing_text_group_excluded_from_strict_main": 21,
+          "paradigm_out_of_protocol_scope": 20377,
           "source_paradigm_test_content_excluded": 10640,
-          "target_paradigm_non_test_content_excluded": 36056
+          "target_paradigm_non_test_content_excluded": 36060
         },
         "leakage_checks": {
           "all_partition_split_group_intersection_count": 0,
@@ -749,24 +747,24 @@
           "excluded": {
             "fuzzy_global_alignment_trial_count": 131,
             "implausible_eeg_trial_duration_trial_count": 8,
-            "material_variant_uncertain_trial_count": 12,
-            "missing_text_trial_count": 28,
+            "material_variant_uncertain_trial_count": 5,
+            "missing_text_trial_count": 21,
             "quality_flag_trial_counts": {
               "broken_brainvision_reference": 8622,
-              "event_text_count_mismatch": 4224,
+              "event_text_count_mismatch": 2722,
               "events_vmrk_count_mismatch": 35,
               "implausible_eeg_trial_duration": 8,
-              "material_variant_uncertain": 12,
-              "missing_text": 28,
-              "ok": 18229,
+              "material_variant_uncertain": 5,
+              "missing_text": 21,
+              "ok": 34246,
               "orphan_row_event_in_recording": 3328,
-              "pl_audio_mapping_unverified": 16642,
+              "pl_audio_mapping_unverified": 33,
               "prechapter_trial_unresolved": 14,
               "ra_audio_boundary_unavailable": 20440,
-              "unresolved_text_alignment": 10450
+              "unresolved_text_alignment": 10443
             },
             "trial_count": 67398,
-            "unresolved_global_alignment_trial_count": 10450
+            "unresolved_global_alignment_trial_count": 10443
           },
           "policy": "quality-independent protocol construction; no quality_flag filtering",
           "selected": {
@@ -776,11 +774,10 @@
               "material_variant_uncertain_trial_count": 0,
               "missing_text_trial_count": 0,
               "quality_flag_trial_counts": {
-                "event_text_count_mismatch": 337,
+                "event_text_count_mismatch": 229,
                 "events_vmrk_count_mismatch": 6,
-                "ok": 2084,
-                "orphan_row_event_in_recording": 229,
-                "pl_audio_mapping_unverified": 1880
+                "ok": 3894,
+                "orphan_row_event_in_recording": 229
               },
               "trial_count": 4129,
               "unresolved_global_alignment_trial_count": 0
@@ -845,32 +842,30 @@
           "trial_count_in_manifest": 300
         },
         "material_variant_uncertain_group_excluded_from_strict_main": {
-          "content_group_count": 4,
+          "content_group_count": 3,
           "split_group_ids": [
             "split-group-v1-165ba1b0a181a2d7f84f330e",
             "split-group-v1-38b93d6b8e9680b2991f6989",
-            "split-group-v1-b22743d3e07cd888e4844a35",
-            "split-group-v1-e5b97fa19555f78a2dc44bfe"
+            "split-group-v1-b22743d3e07cd888e4844a35"
           ],
-          "trial_count_in_manifest": 12
+          "trial_count_in_manifest": 5
         },
         "missing_text_group_excluded_from_strict_main": {
-          "content_group_count": 7,
+          "content_group_count": 6,
           "split_group_ids": [
             "split-group-v1-165ba1b0a181a2d7f84f330e",
             "split-group-v1-38b93d6b8e9680b2991f6989",
             "split-group-v1-573f4f8f6c29454b38c1a537",
             "split-group-v1-b22743d3e07cd888e4844a35",
             "split-group-v1-b87992d9f36f39549d864a97",
-            "split-group-v1-bff1ef3de08b4402f34378d6",
-            "split-group-v1-e5b97fa19555f78a2dc44bfe"
+            "split-group-v1-bff1ef3de08b4402f34378d6"
           ],
-          "trial_count_in_manifest": 28
+          "trial_count_in_manifest": 21
         }
       },
       "policy": "whole split_group_id is excluded if any row triggers a mask",
-      "union_content_group_count": 22,
-      "union_trial_count_in_manifest": 328
+      "union_content_group_count": 21,
+      "union_trial_count_in_manifest": 321
     }
   }
 }

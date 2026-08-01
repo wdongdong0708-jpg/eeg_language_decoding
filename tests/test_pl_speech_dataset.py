@@ -87,4 +87,47 @@ def test_dataset_loads_equal_length_eeg_and_speech(tmp_path: Path) -> None:
     item = dataset[0]
     assert item["eeg"].shape == (4, 750)
     assert item["speech"].shape == (6, 750)
+    assert item["subject_index"] == 0
     assert np.allclose(item["eeg"].mean(dim=1).numpy(), 0.0, atol=1e-6)
+
+
+def test_dataset_applies_brainmagick_style_internal_offset_crop(
+    tmp_path: Path,
+) -> None:
+    window = _window()
+    result = assemble_audio_frame_features(
+        item=AudioFeatureInput(
+            block_id=window.audio_target_id,
+            content_id=window.split_group_id,
+            split=window.split,
+            audio_path=window.audio_file,
+            start_sec=0.0,
+            stop_sec=3.0,
+        ),
+        config=AudioFeatureConfig(model_id="fake"),
+        source_sample_rate_hz=12_000,
+        hidden_states=np.ones((10, 6), dtype=np.float32),
+        convolution_kernels=(10, 3),
+        convolution_strides=(5, 2),
+    )
+    save_audio_sequence_features(
+        tmp_path / safe_artifact_filename(window.audio_target_id),
+        audio_target_id=window.audio_target_id,
+        result=result,
+        target_time_steps=750,
+    )
+    raw_eeg = np.tile(
+        np.linspace(-1, 1, 750, dtype=np.float32),
+        (4, 1),
+    )
+    dataset = PLSpeechDataset(
+        [window],
+        partition="train",
+        feature_dir=tmp_path,
+        alignment_offset_ms=500,
+        eeg_reader=lambda *_: raw_eeg,
+        cache_speech_targets=True,
+    )
+    item = dataset[0]
+    assert dataset.alignment_offset_samples == 125
+    assert item["eeg"].shape == (4, 625)

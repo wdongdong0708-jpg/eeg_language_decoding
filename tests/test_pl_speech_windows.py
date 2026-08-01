@@ -66,6 +66,32 @@ def test_nonoverlap_windows_share_physical_span_and_inherit_split() -> None:
     assert audit["leakage_checks"]["content_group_cross_partition_count"] == 0
 
 
+
+def test_brainmagick_float_condition_maps_to_half_second_overlap() -> None:
+    windows, _ = build_pl_speech_windows(
+        [_row(1)],
+        record_partitions={"record-1": "train"},
+        spec=PLSpeechWindowSpec(window_sec=3.0, stride_sec=0.5, delay_ms=0),
+        manifest_path="manifest.parquet",
+        split_artifact_path="splits.json",
+        audio_info_provider=lambda _: (12_000, 120_000),
+    )
+    windows = sorted(windows, key=lambda item: item.window_offset_sec)
+    assert [item.window_offset_sec for item in windows] == [
+        0.0,
+        0.5,
+        1.0,
+        1.5,
+        2.0,
+        2.5,
+        3.0,
+    ]
+    assert all(item.window_sec == 3.0 for item in windows)
+    assert all(item.stride_sec == 0.5 for item in windows)
+    assert windows[0].audio_start_sec == 1.0
+    assert windows[-1].audio_stop_sec == 7.0
+
+
 def test_delay_moves_only_eeg_span_and_never_crosses_block() -> None:
     windows, _ = build_pl_speech_windows(
         [_row(1)],

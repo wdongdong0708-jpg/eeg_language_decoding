@@ -22,6 +22,7 @@ from data.pl_speech_scaling import (
     fit_speech_standard_scaler,
 )
 from evaluation.speech_retrieval import evaluate_speech_retrieval
+from evaluation.retrieval_metrics import expected_random_retrieval_metrics
 from models.eeg_encoder import build_eeg_encoder
 from models.losses import ClipContrastiveLoss
 from models.retrieval_model import EEGSpeechRetrievalModel
@@ -40,6 +41,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--window-index")
     parser.add_argument("--feature-dir")
     parser.add_argument("--output-dir")
+    parser.add_argument(
+        "--seed",
+        type=int,
+        help="Override only the model/sampler seed while retaining the frozen split",
+    )
+    parser.add_argument(
+        "--frozen-protocol",
+        help="Verify immutable config, data, feature-index, and training-code hashes",
+    )
     parser.add_argument("--smoke-test", action="store_true")
     return parser.parse_args()
 
@@ -58,6 +68,45 @@ def _seed_everything(seed: int) -> None:
 
 def _file_sha256(path: str | Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def _tree_sha256(directory: str | Path, pattern: str) -> tuple[str, int]:
+    rows: list[str] = []
+    for path in sorted(Path(directory).glob(pattern), key=lambda item: item.name):
+        rows.append(f"{path.name}|{_file_sha256(path)}\n")
+    digest = hashlib.sha256("".join(rows).encode("utf-8")).hexdigest()
+    return digest, len(rows)
+
+
+def _verify_frozen_protocol(
+    protocol_path: str | Path,
+    config_path: str | Path,
+) -> dict[str, object]:
+    path = Path(protocol_path)
+    protocol = json.loads(path.read_text(encoding="utf-8"))
+    if protocol.get("status") != "frozen":
+        raise ValueError("Training requires a frozen protocol")
+    frozen_config = protocol["config"]
+    if Path(config_path).resolve() != Path(frozen_config["path"]).resolve():
+        raise ValueError("--config must be the config named by the frozen protocol")
+    if _file_sha256(config_path) != frozen_config["sha256"]:
+        raise ValueError("Frozen configuration hash no longer matches")
+    for section in ("frozen_inputs", "training_code"):
+        for item in protocol[section]:
+            observed = _file_sha256(item["path"])
+            if observed != item["sha256"]:
+                raise ValueError(
+                    f"Frozen {section} artifact changed: {item['path']}"
+                )
+    for item in protocol.get("frozen_trees", []):
+        observed, count = _tree_sha256(item["path"], item["pattern"])
+        if observed != item["sha256"] or count != item["file_count"]:
+            raise ValueError(f"Frozen file tree changed: {item['path']}")
+    return {
+        "path": path.as_posix(),
+        "sha256": _file_sha256(path),
+        "protocol_id": protocol["protocol_id"],
+    }
 
 
 def _batch_schedule_sha256(
@@ -81,6 +130,13 @@ def _batch_schedule_sha256(
 def main() -> None:
     args = parse_args()
     config = yaml.safe_load(Path(args.config).read_text(encoding="utf-8"))
+    frozen_protocol = (
+        _verify_frozen_protocol(args.frozen_protocol, args.config)
+        if args.frozen_protocol
+        else None
+    )
+    if args.seed is not None:
+        config["seed"] = args.seed
     seed = int(config["seed"])
     _seed_everything(seed)
     device = torch.device(
@@ -91,9 +147,40 @@ def main() -> None:
     window_jsonl = args.window_index or config["window_index"]
     feature_dir = args.feature_dir or config["audio_feature_dir"]
     all_windows = load_pl_window_jsonl(window_jsonl)
+    subject_group_ids = sorted(
+        {window.subject_group_id for window in all_windows}
+    )
+    subject_index_by_group = {
+        subject_group_id: index
+        for index, subject_group_id in enumerate(subject_group_ids)
+    }
+    expected_subject_count = config["model"].get("expected_subject_count")
+    if (
+        expected_subject_count is not None
+        and len(subject_group_ids) != int(expected_subject_count)
+    ):
+        raise ValueError(
+            "Frozen subject count does not match the window index: "
+            f"{len(subject_group_ids)} != {expected_subject_count}"
+        )
     delays = sorted({window.eeg_delay_ms for window in all_windows})
     if len(delays) != 1:
         raise ValueError(f"One training run requires exactly one EEG delay: {delays}")
+    configured_alignment_offset = config["window"].get(
+        "alignment_offset_ms"
+    )
+    if configured_alignment_offset is None:
+        alignment_offset_ms = 0.0
+        active_eeg_delay_ms = delays[0]
+        delay_application = "source_window_shift"
+    else:
+        if delays[0] != 0:
+            raise ValueError(
+                "Internal alignment crop requires a zero-delay window index"
+            )
+        alignment_offset_ms = float(configured_alignment_offset)
+        active_eeg_delay_ms = alignment_offset_ms
+        delay_application = "crop_within_window"
     window_source: object = all_windows
     if args.smoke_test:
         index_path = Path(feature_dir) / "feature_index.jsonl"
@@ -138,7 +225,9 @@ def main() -> None:
         eeg_scaler=eeg_scaler,
         speech_scaler=speech_scaler,
         expected_audio_model_id=config["audio_target"]["model_id"],
+        alignment_offset_ms=alignment_offset_ms,
         cache_speech_targets=bool(config["training"]["cache_speech_targets"]),
+        subject_index_by_group=subject_index_by_group,
     )
     validation_dataset = PLSpeechDataset(
         window_source,
@@ -148,7 +237,9 @@ def main() -> None:
         eeg_scaler=eeg_scaler,
         speech_scaler=speech_scaler,
         expected_audio_model_id=config["audio_target"]["model_id"],
+        alignment_offset_ms=alignment_offset_ms,
         cache_speech_targets=bool(config["training"]["cache_speech_targets"]),
+        subject_index_by_group=subject_index_by_group,
     )
     batch_size = int(config["training"]["batch_size"])
     train_sampler = UniqueTargetBatchSampler(
@@ -192,6 +283,7 @@ def main() -> None:
         encoder_config,
         input_channels=int(sample["eeg"].shape[0]),
         output_channels=int(sample["speech"].shape[0]),
+        n_subjects=len(subject_group_ids),
     )
     loss_config = config["loss"]
     objective = ClipContrastiveLoss(
@@ -274,6 +366,10 @@ def main() -> None:
         ),
         position_pool_size=position_pool_size,
     )
+    random_global = expected_random_retrieval_metrics(candidate_count)
+    random_position_local = expected_random_retrieval_metrics(
+        position_pool_size
+    )
     output_dir = Path(args.output_dir or config["output_dir"])
     output_dir.mkdir(parents=True, exist_ok=True)
     report = {
@@ -282,13 +378,24 @@ def main() -> None:
         "device": str(device),
         "window_index": window_jsonl,
         "audio_feature_dir": str(feature_dir),
-        "active_eeg_delay_ms": delays[0],
+        "source_window_eeg_delay_ms": delays[0],
+        "active_eeg_delay_ms": active_eeg_delay_ms,
+        "alignment": {
+            "application": delay_application,
+            "offset_ms": alignment_offset_ms,
+            "input_time_steps": all_windows[0].eeg_sample_count,
+            "effective_time_steps": int(sample["eeg"].shape[-1]),
+        },
         "window_index_sha256": _file_sha256(window_jsonl),
         "config": config,
         "history": history,
         "epochs_run": epochs,
         "best_epoch": best_epoch,
         "best_validation_loss": best_validation_loss,
+        "subjects": {
+            "count": len(subject_group_ids),
+            "index_by_group": subject_index_by_group,
+        },
         "preprocessing": {
             "eeg": eeg_scaler.audit() if eeg_scaler is not None else {
                 "name": config["eeg_normalization"],
@@ -314,6 +421,7 @@ def main() -> None:
                 validation_batch_schedule_sha256
             ),
         },
+        "frozen_protocol": frozen_protocol,
         "validation_retrieval": {
             "global": asdict(retrieval_metrics["global"]),
             "position_local": asdict(retrieval_metrics["position_local"]),
@@ -321,6 +429,13 @@ def main() -> None:
             "candidate_count": candidate_count,
             "position_local_pool_size": position_pool_size,
             "tie_policy": "pessimistic",
+        },
+        "validation_random_baseline": {
+            "method": "analytical_uniform_random_ranking",
+            "global": asdict(random_global),
+            "position_local": asdict(random_position_local),
+            "candidate_count": candidate_count,
+            "position_local_pool_size": position_pool_size,
         },
         "smoke_test": args.smoke_test,
     }
@@ -350,6 +465,7 @@ def main() -> None:
                     else None
                 ),
             },
+            "subject_index_by_group": subject_index_by_group,
             "report_path": report_path.as_posix(),
             "window_index_sha256": report["window_index_sha256"],
         },
