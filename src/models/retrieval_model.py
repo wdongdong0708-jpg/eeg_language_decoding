@@ -20,12 +20,21 @@ class EEGSpeechRetrievalModel(nn.Module):
         self.eeg_encoder = eeg_encoder
         self.objective = objective
 
-    def forward(self, eeg: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self,
+        eeg: torch.Tensor,
+        subject_indices: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        if getattr(self.eeg_encoder, "requires_subject_indices", False):
+            if subject_indices is None:
+                raise ValueError("This EEG encoder requires subject_indices")
+            return self.eeg_encoder(eeg, subject_indices)
         return self.eeg_encoder(eeg)
 
     def compute_loss(
         self,
         eeg: torch.Tensor,
         speech_targets: torch.Tensor,
+        subject_indices: torch.Tensor | None = None,
     ) -> torch.Tensor:
-        return self.objective(self(eeg), speech_targets)
+        return self.objective(self(eeg, subject_indices), speech_targets)

@@ -179,6 +179,8 @@ class MetaAlignedConvNoSubject(nn.Module):
         glu_context: int = 1,
         batch_norm: bool = True,
         skip: bool = True,
+        n_subjects: int | None = None,
+        subject_layer_init_identity: bool = False,
     ) -> None:
         super().__init__()
         if min(
@@ -199,6 +201,16 @@ class MetaAlignedConvNoSubject(nn.Module):
             raise ValueError("glu_context must be non-negative")
 
         self.initial = nn.Conv1d(input_channels, initial_channels, 1)
+        self.subject_layer = (
+            BrainMagickSubjectLayer(
+                initial_channels,
+                initial_channels,
+                n_subjects,
+                init_identity=subject_layer_init_identity,
+            )
+            if n_subjects is not None
+            else None
+        )
         self.layers = nn.ModuleList()
         self.glus = nn.ModuleList()
         self.dilations: list[int] = []
@@ -250,6 +262,9 @@ class MetaAlignedConvNoSubject(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.initial(x)
+        return self._forward_conv_stack(x)
+
+    def _forward_conv_stack(self, x: torch.Tensor) -> torch.Tensor:
         for layer, glu in zip(self.layers, self.glus, strict=True):
             previous = x
             x = layer(x)
@@ -259,11 +274,91 @@ class MetaAlignedConvNoSubject(nn.Module):
         return self.final(x)
 
 
+class BrainMagickSubjectLayer(nn.Module):
+    """Per-subject channel mixing used by BrainMagick's ``SubjectLayers``."""
+
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        n_subjects: int,
+        *,
+        init_identity: bool = False,
+    ) -> None:
+        super().__init__()
+        if min(in_channels, out_channels, n_subjects) < 1:
+            raise ValueError("Subject-layer dimensions must be positive")
+        self.weights = nn.Parameter(
+            torch.randn(n_subjects, in_channels, out_channels)
+        )
+        if init_identity:
+            if in_channels != out_channels:
+                raise ValueError("Identity init requires equal channel dimensions")
+            self.weights.data[:] = torch.eye(in_channels)[None]
+        self.weights.data *= 1.0 / in_channels**0.5
+
+    def forward(
+        self,
+        x: torch.Tensor,
+        subject_indices: torch.Tensor,
+    ) -> torch.Tensor:
+        if subject_indices.ndim != 1 or subject_indices.shape[0] != x.shape[0]:
+            raise ValueError("subject_indices must have shape [batch]")
+        if subject_indices.dtype != torch.long:
+            raise ValueError("subject_indices must use torch.long")
+        if torch.any(subject_indices < 0) or torch.any(
+            subject_indices >= self.weights.shape[0]
+        ):
+            raise ValueError("subject index is out of range")
+        _, in_channels, out_channels = self.weights.shape
+        weights = self.weights.gather(
+            0,
+            subject_indices.view(-1, 1, 1).expand(
+                -1, in_channels, out_channels
+            ),
+        )
+        return torch.einsum("bct,bcd->bdt", x, weights)
+
+
+class MetaAlignedConvWithSubject(MetaAlignedConvNoSubject):
+    """Meta-aligned convolutional encoder with a per-subject 1x1 layer."""
+
+    requires_subject_indices = True
+
+    def __init__(
+        self,
+        input_channels: int,
+        output_channels: int,
+        *,
+        n_subjects: int,
+        subject_layer_init_identity: bool = False,
+        **kwargs: object,
+    ) -> None:
+        super().__init__(
+            input_channels=input_channels,
+            output_channels=output_channels,
+            n_subjects=n_subjects,
+            subject_layer_init_identity=subject_layer_init_identity,
+            **kwargs,
+        )
+
+    def forward(
+        self,
+        x: torch.Tensor,
+        subject_indices: torch.Tensor,
+    ) -> torch.Tensor:
+        x = self.initial(x)
+        assert self.subject_layer is not None
+        x = self.subject_layer(x, subject_indices)
+        return self._forward_conv_stack(x)
+
+
 def build_eeg_encoder(
     config: dict[str, object],
     *,
     input_channels: int,
     output_channels: int,
+    n_subjects: int | None = None,
 ) -> nn.Module:
     """Build a configured EEG encoder while retaining old checkpoint support."""
 
@@ -288,6 +383,27 @@ def build_eeg_encoder(
         return MetaAlignedConvNoSubject(
             input_channels=input_channels,
             output_channels=output_channels,
+            initial_channels=int(config["initial_channels"]),
+            hidden_channels=int(config["hidden_channels"]),
+            depth=int(config["depth"]),
+            kernel_size=int(config["kernel_size"]),
+            dilation_growth=int(config["dilation_growth"]),
+            dilation_period=int(config["dilation_period"]),
+            glu_every=int(config["glu_every"]),
+            glu_context=int(config["glu_context"]),
+            batch_norm=bool(config["batch_norm"]),
+            skip=bool(config["skip"]),
+        )
+    if name == "meta_aligned_conv_subject":
+        if n_subjects is None:
+            raise ValueError("Subject-layer encoder requires n_subjects")
+        return MetaAlignedConvWithSubject(
+            input_channels=input_channels,
+            output_channels=output_channels,
+            n_subjects=n_subjects,
+            subject_layer_init_identity=bool(
+                config.get("subject_layer_init_identity", False)
+            ),
             initial_channels=int(config["initial_channels"]),
             hidden_channels=int(config["hidden_channels"]),
             depth=int(config["depth"]),

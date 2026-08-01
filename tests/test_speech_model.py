@@ -2,9 +2,11 @@ import pytest
 import torch
 
 from models.eeg_encoder import (
+    BrainMagickSubjectLayer,
     DilatedConvBlock,
     DilatedSimpleConv,
     MetaAlignedConvNoSubject,
+    MetaAlignedConvWithSubject,
     build_eeg_encoder,
 )
 from models.losses import ClipContrastiveLoss, sequence_similarity
@@ -66,6 +68,69 @@ def test_encoder_factory_builds_meta_no_subject_topology() -> None:
         output_channels=16,
     )
     assert isinstance(encoder, MetaAlignedConvNoSubject)
+
+
+def test_brainmagick_subject_layer_selects_one_matrix_per_example() -> None:
+    layer = BrainMagickSubjectLayer(2, 2, 2)
+    with torch.no_grad():
+        layer.weights[0] = torch.eye(2)
+        layer.weights[1] = torch.tensor([[0.0, 1.0], [1.0, 0.0]])
+    inputs = torch.tensor(
+        [
+            [[1.0, 2.0], [3.0, 4.0]],
+            [[5.0, 6.0], [7.0, 8.0]],
+        ]
+    )
+
+    outputs = layer(inputs, torch.tensor([0, 1], dtype=torch.long))
+
+    assert torch.equal(outputs[0], inputs[0])
+    assert torch.equal(outputs[1], inputs[1].flip(0))
+
+
+def test_encoder_factory_builds_meta_subject_topology() -> None:
+    encoder = build_eeg_encoder(
+        {
+            "name": "meta_aligned_conv_subject",
+            "initial_channels": 10,
+            "hidden_channels": 12,
+            "depth": 2,
+            "kernel_size": 3,
+            "dilation_growth": 2,
+            "dilation_period": 5,
+            "glu_every": 2,
+            "glu_context": 1,
+            "batch_norm": True,
+            "skip": True,
+            "subject_layer_init_identity": False,
+        },
+        input_channels=8,
+        output_channels=16,
+        n_subjects=3,
+    )
+    assert isinstance(encoder, MetaAlignedConvWithSubject)
+    output = encoder(
+        torch.randn(3, 8, 75),
+        torch.tensor([0, 1, 2], dtype=torch.long),
+    )
+    assert output.shape == (3, 16, 75)
+
+
+def test_subject_encoder_requires_subject_indices() -> None:
+    encoder = MetaAlignedConvWithSubject(
+        input_channels=4,
+        output_channels=6,
+        n_subjects=2,
+        initial_channels=5,
+        hidden_channels=8,
+        depth=2,
+    )
+    model = EEGSpeechRetrievalModel(
+        encoder,
+        ClipContrastiveLoss(norm_kind="xy"),
+    )
+    with pytest.raises(ValueError, match="subject_indices"):
+        model(torch.randn(2, 4, 20))
 
 
 def test_sequence_similarity_normalization_matches_manual_result() -> None:

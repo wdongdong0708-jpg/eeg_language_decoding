@@ -26,8 +26,9 @@ def train_one_epoch(
             break
         eeg = batch["eeg"].to(device, non_blocking=True)
         speech = batch["speech"].to(device, non_blocking=True)
+        subject_indices = batch["subject_index"].to(device, non_blocking=True)
         optimizer.zero_grad(set_to_none=True)
-        loss = model.compute_loss(eeg, speech)
+        loss = model.compute_loss(eeg, speech, subject_indices)
         if not torch.isfinite(loss):
             raise FloatingPointError(f"Non-finite training loss: {loss.item()}")
         loss.backward()
@@ -67,7 +68,8 @@ def evaluate_loss(
             break
         eeg = batch["eeg"].to(device, non_blocking=True)
         speech = batch["speech"].to(device, non_blocking=True)
-        loss = model.compute_loss(eeg, speech)
+        subject_indices = batch["subject_index"].to(device, non_blocking=True)
+        loss = model.compute_loss(eeg, speech, subject_indices)
         if not torch.isfinite(loss):
             raise FloatingPointError(f"Non-finite validation loss: {loss.item()}")
         count = int(eeg.shape[0])
