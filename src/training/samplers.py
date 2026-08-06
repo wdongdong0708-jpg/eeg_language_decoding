@@ -9,6 +9,50 @@ from collections.abc import Iterator, Sequence
 from torch.utils.data import Sampler
 
 
+class AllOccurrenceBatchSampler(Sampler[list[int]]):
+    """Shuffle and visit every occurrence exactly once per epoch.
+
+    Duplicate target IDs are deliberately allowed inside a batch.  D-SigLIP
+    must handle them in the objective rather than suppressing EEG examples in
+    the sampler.
+    """
+
+    def __init__(
+        self,
+        sample_count: int,
+        *,
+        batch_size: int,
+        seed: int,
+        drop_last: bool = False,
+    ) -> None:
+        if sample_count <= 0:
+            raise ValueError("sample_count must be positive")
+        if batch_size < 2:
+            raise ValueError("batch_size must be at least two")
+        self.sample_count = int(sample_count)
+        self.batch_size = int(batch_size)
+        self.seed = int(seed)
+        self.drop_last = bool(drop_last)
+        self.epoch = 0
+
+    def set_epoch(self, epoch: int) -> None:
+        if epoch < 0:
+            raise ValueError("epoch must be non-negative")
+        self.epoch = int(epoch)
+
+    def __iter__(self) -> Iterator[list[int]]:
+        indices = list(range(self.sample_count))
+        random.Random(f"{self.seed}\0all-occurrences\0{self.epoch}").shuffle(indices)
+        for start in range(0, self.sample_count, self.batch_size):
+            batch = indices[start : start + self.batch_size]
+            if len(batch) == self.batch_size or not self.drop_last:
+                yield batch
+
+    def __len__(self) -> int:
+        full, partial = divmod(self.sample_count, self.batch_size)
+        return full + int(bool(partial) and not self.drop_last)
+
+
 class UniqueTargetBatchSampler(Sampler[list[int]]):
     """Visit every sample while preventing duplicate target IDs within a batch."""
 

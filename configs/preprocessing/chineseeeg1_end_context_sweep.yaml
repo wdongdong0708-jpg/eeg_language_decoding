@@ -1,0 +1,6 @@
+source_index: metadata/generated/chineseeeg1_content_block_semantic_strict_k2_k4_seed42.parquet
+post_context_ms: [1000.0, 2000.0]
+output_template: metadata/generated/chineseeeg1_semantic_static_endctx_{label}_common_seed42.parquet
+raw_output_template: metadata/generated/chineseeeg1_semantic_static_endctx_{label}_full_seed42.parquet
+audit_output: reports/chineseeeg1_semantic_static_end_context_sweep_seed42.json
+raw_audit_output: reports/chineseeeg1_semantic_static_end_context_full_support_seed42.json

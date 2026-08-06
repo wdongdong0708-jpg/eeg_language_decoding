@@ -1,0 +1,114 @@
+experiment:
+  name: chineseeeg1_static_dsiglip_endctx1s
+  seed: 42
+  protocol: strict_semantic_static_text_end_context_sensitivity
+
+data:
+  span_index: metadata/generated/chineseeeg1_semantic_static_endctx_1000ms_full_seed42.parquet
+  text_feature_dir: experiments/features/chineseeeg1_text/seen_text_sliding_k2_k5_hidden_last
+  source_timeline_audit: reports/chineseeeg1_character_timeline_audit.json
+  end_context_audit: reports/chineseeeg1_semantic_static_end_context_full_support_seed42.json
+
+selection:
+  semantic_only: true
+  span_lengths: [2, 3, 4]
+  train_jointly_across_lengths: false
+
+alignment:
+  timed_character_duration_ms: 350.0
+  neural_delay_ms: 0.0
+  left_context_ms: 0.0
+  post_final_character_context_ms: 1000.0
+  start_anchor: estimated_first_character_onset
+  end_anchor: estimated_final_character_display_boundary_plus_context
+  exact_character_onsets_observed: false
+  cross_sentence_context: forbidden
+  support: all_valid_1s_occurrences
+
+preprocessing:
+  source: official_filtered_0.5_30hz_256hz
+  filtering: none
+  rereference: none
+  ica: none
+  bad_channel_interpolation: none
+  resampling: none
+  eeg_normalization: train_recording_robust_clamp
+  robust_center: per_recording_per_channel_median
+  robust_scale: per_recording_per_channel_iqr
+  overlapping_fit_samples: count_physical_sample_once
+  clamp: 5.0
+
+text_target:
+  model_id: bert-base-chinese
+  feature_layer: -1
+  feature_scope: local_span
+  pooling: character_mean
+  output: static_D
+  interpolation: none
+  frozen: true
+
+model:
+  eeg_encoder:
+    name: meta_aligned_conv_no_subject
+    initial_channels: 270
+    hidden_channels: 320
+    depth: 10
+    kernel_size: 3
+    dilation_growth: 2
+    dilation_period: 5
+    batch_norm: true
+    skip: true
+    glu_every: 2
+    glu_context: 1
+  shared_dim: 768
+  eeg_temporal_pooling: attention
+  projection_dropout: 0.1
+  text_pooling: mean
+  text_projection: identity
+  normalize_embeddings: true
+  subject_layer: false
+
+loss:
+  name: d_siglip
+  normalize: true
+  logit_scale_init: 10.0
+  learn_temperature: true
+  bias_init: -10.0
+  learn_bias: true
+  duplicate_handling: mask_equivalent_off_diagonal_keep_each_diagonal
+  false_negative_strategy: mask
+  overlap_threshold: 0.5
+  lexical_overlap_threshold: 0.6
+  semantic_similarity_threshold: 0.85
+  adjacent_position_distance: 1
+
+training:
+  optimizer: adamw
+  scheduler: cosine
+  learning_rate: 0.0001
+  minimum_learning_rate: 0.0
+  weight_decay: 0.01
+  batch_size: 128
+  epochs: 50
+  early_stopping_patience: 10
+  checkpoint_metric: validation_macro_recall_at_10
+  gradient_clip_norm: 1.0
+  num_workers: 0
+  all_eeg_occurrences_per_epoch: true
+  one_occurrence_per_text_per_epoch: false
+  duplicate_targets_allowed_in_batch: true
+  drop_last: false
+  validation_drop_last: false
+
+evaluation:
+  validation_candidate_identity: unique_span_text_id
+  validation_aggregation: macro_class_balanced
+  checkpoint_recall_k: 10
+  query_batch_size: 128
+  candidate_batch_size: 2048
+  test_primary_candidate_pool: all_unique_test_segment
+  test_primary_aggregation: micro
+  diagnostic_candidate_pool_sizes: [20, 100, 1000]
+
+output:
+  directory_template: experiments/chineseeeg1_static_dsiglip_endctx1s_k{span_length}_seed42
