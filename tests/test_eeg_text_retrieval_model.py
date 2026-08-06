@@ -8,6 +8,7 @@ from models.projection_head import (
     PooledProjectionHead,
 )
 from models.retrieval_model import EEGTextRetrievalModel
+from models.text_retrieval_factory import build_eeg_text_retrieval_model
 
 
 def test_eeg_text_model_pools_fixed_eeg_and_character_states() -> None:
@@ -92,3 +93,44 @@ def test_pooled_projection_head_supports_bahdanau_attention() -> None:
     output = projection(torch.randn(3, 5, 17))
 
     assert output.shape == (3, 7)
+
+
+def test_text_projection_can_be_learnable_and_identity_initialized() -> None:
+    config = {
+        "model": {
+            "eeg_encoder": {
+                "name": "dilated_simple_conv",
+                "hidden_channels": 8,
+                "depth": 2,
+                "kernel_size": 3,
+                "growth": 1.0,
+                "dilation_growth": 2,
+                "dilation_period": 5,
+                "dropout": 0.0,
+                "dropout_input": 0.0,
+                "batch_norm": False,
+                "residual": False,
+                "activation_on_last": False,
+            },
+            "shared_dim": 6,
+            "eeg_temporal_pooling": "mean",
+            "text_pooling": "mean",
+            "text_projection": "linear",
+            "text_projection_init": "identity",
+        },
+        "training": {},
+        "loss": {"name": "d_siglip"},
+    }
+    model = build_eeg_text_retrieval_model(
+        config,
+        eeg_channels=3,
+        text_shape=(6,),
+    )
+    projection = model.text_projection
+    assert isinstance(projection, nn.Linear)
+    assert torch.equal(projection.weight, torch.eye(6))
+    assert torch.count_nonzero(projection.bias) == 0
+    assert projection.weight.requires_grad
+
+    model.encode_text(torch.randn(4, 6)).sum().backward()
+    assert projection.weight.grad is not None

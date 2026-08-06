@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 
+import torch
 from torch import nn
 
 from models.eeg_encoder import build_eeg_encoder
@@ -48,6 +49,22 @@ def build_eeg_text_retrieval_model(
         text_projection: nn.Module = nn.Identity()
     elif projection_kind == "linear":
         text_projection = nn.Linear(text_dim, shared_dim)
+        projection_init = str(
+            model_config.get("text_projection_init", "pytorch_default")
+        )
+        if projection_init == "identity":
+            if text_dim != shared_dim:
+                raise ValueError(
+                    "Identity-initialized text projection requires "
+                    "text_dim == shared_dim"
+                )
+            with torch.no_grad():
+                nn.init.eye_(text_projection.weight)
+                nn.init.zeros_(text_projection.bias)
+        elif projection_init != "pytorch_default":
+            raise ValueError(
+                f"Unknown text projection initialization: {projection_init}"
+            )
     else:
         raise ValueError(f"Unknown text projection: {projection_kind}")
 
