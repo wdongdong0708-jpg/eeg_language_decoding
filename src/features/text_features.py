@@ -7,7 +7,7 @@ import os
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Literal, Sequence
+from typing import Iterator, Literal, Sequence
 
 import numpy as np
 
@@ -18,6 +18,9 @@ OFFICIAL_TEXT_MODEL = "bert-base-chinese"
 OFFICIAL_TEXT_POOLING = "last_hidden_state.mean(dim=1)"
 
 SentencePooling = Literal["mean_content_tokens", "mean_attended_tokens", "cls"]
+SpanPooling = Literal["mean", "attention", "cls"]
+RepresentationSource = Literal["hidden_state", "input_token_embedding"]
+STATIC_CHARACTER_BASELINE_LAYER_INDEX = 0
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,6 +44,7 @@ class TextFeatureConfig:
     batch_size: int = 16
     output_dtype: str = "float32"
     strict_character_alignment: bool = True
+    representation_source: RepresentationSource = "hidden_state"
 
     def validate(self) -> None:
         if self.max_length < 3:
@@ -54,6 +58,20 @@ class TextFeatureConfig:
         }:
             raise ValueError(f"Unknown sentence pooling: {self.sentence_pooling}")
         np.dtype(self.output_dtype)
+        if self.representation_source not in {
+            "hidden_state",
+            "input_token_embedding",
+        }:
+            raise ValueError(
+                f"Unknown representation_source: {self.representation_source}"
+            )
+        if (
+            self.representation_source == "input_token_embedding"
+            and self.layer_index != STATIC_CHARACTER_BASELINE_LAYER_INDEX
+        ):
+            raise ValueError(
+                "Static input-token embeddings use layer_index=0 for provenance"
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -77,11 +95,17 @@ class TextFeatureResult:
     character_is_highlighted: np.ndarray
     character_token_indices: tuple[tuple[int, ...], ...]
     truncated: bool
+    representation_source: str = "hidden_state"
     unmapped_character_indices: tuple[int, ...] = ()
 
     def validate(self) -> None:
         if not self.content_id or not self.text:
             raise ValueError("Text feature provenance is incomplete")
+        if self.representation_source not in {
+            "hidden_state",
+            "input_token_embedding",
+        }:
+            raise ValueError("Unknown text representation source")
         token_count = len(self.tokens)
         character_count = len(self.characters)
         hidden_size = int(self.sentence_hidden_state.shape[0])
@@ -107,6 +131,123 @@ class TextFeatureResult:
             raise ValueError("character_is_highlighted must have shape [characters]")
         if len(self.character_token_indices) != character_count:
             raise ValueError("character_token_indices length is inconsistent")
+
+
+@dataclass(frozen=True, slots=True)
+class TextSpanSelection:
+    """Offset-derived text states for a raw half-open character interval."""
+
+    content_id: str
+    raw_start: int
+    raw_stop: int
+    character_indices: np.ndarray
+    characters: tuple[str, ...]
+    character_hidden_states: np.ndarray
+    source_token_indices: tuple[tuple[int, ...], ...]
+
+    def validate(self, *, expected_character_count: int | None = None) -> None:
+        count = len(self.characters)
+        if self.raw_start < 0 or self.raw_stop <= self.raw_start:
+            raise ValueError("Raw span offsets must be ordered")
+        if self.character_indices.shape != (count,):
+            raise ValueError("character_indices shape is inconsistent")
+        if self.character_hidden_states.ndim != 2:
+            raise ValueError("character_hidden_states must have shape [characters, hidden]")
+        if self.character_hidden_states.shape[0] != count:
+            raise ValueError("Character state count is inconsistent")
+        if len(self.source_token_indices) != count:
+            raise ValueError("source_token_indices count is inconsistent")
+        if expected_character_count is not None and count != expected_character_count:
+            raise ValueError(
+                f"Expected {expected_character_count} mapped characters, got {count}"
+            )
+
+
+def select_text_span_by_offsets(
+    result: TextFeatureResult,
+    *,
+    raw_start: int,
+    raw_stop: int,
+    highlighted_only: bool = True,
+    included_character_indices: Sequence[int] | None = None,
+    expected_character_count: int | None = None,
+) -> TextSpanSelection:
+    """Select a span through tokenizer offsets, never inferred token positions."""
+
+    result.validate()
+    if raw_start < 0 or raw_stop <= raw_start or raw_stop > len(result.text):
+        raise ValueError(
+            f"Invalid raw interval [{raw_start}, {raw_stop}) for text length "
+            f"{len(result.text)}"
+        )
+    selected = (
+        (result.character_indices >= raw_start)
+        & (result.character_indices < raw_stop)
+    )
+    if included_character_indices is not None:
+        included = np.asarray(included_character_indices, dtype=np.int64)
+        if included.ndim != 1:
+            raise ValueError("included_character_indices must be one-dimensional")
+        if np.any(included < raw_start) or np.any(included >= raw_stop):
+            raise ValueError("An included character lies outside the raw span")
+        selected &= np.isin(result.character_indices, included)
+    elif highlighted_only:
+        selected &= result.character_is_highlighted
+    positions = np.flatnonzero(selected)
+    selection = TextSpanSelection(
+        content_id=result.content_id,
+        raw_start=raw_start,
+        raw_stop=raw_stop,
+        character_indices=result.character_indices[positions].copy(),
+        characters=tuple(result.characters[index] for index in positions),
+        character_hidden_states=result.character_hidden_states[positions].copy(),
+        source_token_indices=tuple(
+            result.character_token_indices[index] for index in positions
+        ),
+    )
+    selection.validate(expected_character_count=expected_character_count)
+    return selection
+
+
+def pool_text_span(
+    result: TextFeatureResult,
+    selection: TextSpanSelection,
+    *,
+    pooling: SpanPooling,
+    attention_logits: np.ndarray | None = None,
+) -> np.ndarray:
+    """Pool an offset-selected span; attention weights must be explicit."""
+
+    selection.validate()
+    if selection.content_id != result.content_id:
+        raise ValueError("Span selection and feature result content IDs differ")
+    states = selection.character_hidden_states
+    if not len(states):
+        raise ValueError("Cannot pool an empty text span")
+    if pooling == "mean":
+        return states.mean(axis=0)
+    if pooling == "attention":
+        if attention_logits is None:
+            raise ValueError("attention pooling requires explicit attention_logits")
+        logits = np.asarray(attention_logits, dtype=np.float64)
+        if logits.shape != (len(states),):
+            raise ValueError(
+                f"attention_logits must have shape {(len(states),)}, got {logits.shape}"
+            )
+        logits -= logits.max()
+        weights = np.exp(logits)
+        weights /= weights.sum()
+        return np.sum(states * weights[:, None], axis=0)
+    if pooling == "cls":
+        special_zero_offset = np.flatnonzero(
+            result.special_tokens_mask
+            & (result.token_offsets[:, 0] == 0)
+            & (result.token_offsets[:, 1] == 0)
+        )
+        if not len(special_zero_offset):
+            raise ValueError("No CLS-like special token was found")
+        return result.token_hidden_states[special_zero_offset[0]].copy()
+    raise ValueError(f"Unknown span pooling: {pooling}")
 
 
 def _sentence_pool(
@@ -152,6 +293,7 @@ def assemble_text_features(
     truncated: bool,
     output_dtype: str = "float32",
     strict_character_alignment: bool = True,
+    representation_source: RepresentationSource = "hidden_state",
 ) -> TextFeatureResult:
     """Assemble all granularities from tokenizer offsets and model states."""
 
@@ -253,6 +395,7 @@ def assemble_text_features(
         character_is_highlighted=np.asarray(character_highlighted, dtype=bool),
         character_token_indices=tuple(character_tokens),
         truncated=truncated,
+        representation_source=representation_source,
         unmapped_character_indices=tuple(unmapped),
     )
     result.validate()
@@ -317,9 +460,18 @@ class TextEmbeddingExtractor:
         )
 
     def extract(self, items: Sequence[TextFeatureInput]) -> list[TextFeatureResult]:
+        """Extract a finite collection; use :meth:`iter_extract` for large jobs."""
+
+        return list(self.iter_extract(items))
+
+    def iter_extract(
+        self,
+        items: Sequence[TextFeatureInput],
+    ) -> Iterator[TextFeatureResult]:
+        """Yield completed batches so large corpora can be saved incrementally."""
+
         import torch
 
-        results: list[TextFeatureResult] = []
         for batch_start in range(0, len(items), self.config.batch_size):
             batch = list(items[batch_start : batch_start + self.config.batch_size])
             for item in batch:
@@ -341,16 +493,22 @@ class TextEmbeddingExtractor:
                 name: tensor.to(self.device) if self.device else tensor
                 for name, tensor in encoded.items()
             }
-            needs_all_layers = self.config.layer_index != -1
-            with torch.inference_mode():
-                outputs = self.model(
-                    **model_inputs,
-                    output_hidden_states=needs_all_layers,
-                )
-            if self.config.layer_index == -1:
-                hidden = outputs.last_hidden_state
+            if self.config.representation_source == "input_token_embedding":
+                with torch.inference_mode():
+                    hidden = self.model.get_input_embeddings()(
+                        model_inputs["input_ids"]
+                    )
             else:
-                hidden = outputs.hidden_states[self.config.layer_index]
+                needs_all_layers = self.config.layer_index != -1
+                with torch.inference_mode():
+                    outputs = self.model(
+                        **model_inputs,
+                        output_hidden_states=needs_all_layers,
+                    )
+                if self.config.layer_index == -1:
+                    hidden = outputs.last_hidden_state
+                else:
+                    hidden = outputs.hidden_states[self.config.layer_index]
 
             hidden_np = hidden.detach().cpu().numpy()
             ids_np = encoded["input_ids"].detach().cpu().numpy()
@@ -366,8 +524,7 @@ class TextEmbeddingExtractor:
                 tokens = self.tokenizer.convert_ids_to_tokens(
                     ids_np[batch_index].tolist()
                 )
-                results.append(
-                    assemble_text_features(
+                yield assemble_text_features(
                         item=item,
                         model_id=self.config.model_id,
                         layer_index=self.config.layer_index,
@@ -383,9 +540,8 @@ class TextEmbeddingExtractor:
                         strict_character_alignment=(
                             self.config.strict_character_alignment
                         ),
+                        representation_source=self.config.representation_source,
                     )
-                )
-        return results
 
 
 def _character_token_csr(
@@ -412,6 +568,7 @@ def save_text_features(path: str | Path, result: TextFeatureResult) -> None:
         "model_id": result.model_id,
         "layer_index": result.layer_index,
         "sentence_pooling": result.sentence_pooling,
+        "representation_source": result.representation_source,
         "truncated": result.truncated,
         "unmapped_character_indices": list(result.unmapped_character_indices),
     }
@@ -478,6 +635,9 @@ def load_text_features(path: str | Path) -> TextFeatureResult:
             character_is_highlighted=archive["character_is_highlighted"],
             character_token_indices=mappings,
             truncated=bool(metadata["truncated"]),
+            representation_source=metadata.get(
+                "representation_source", "hidden_state"
+            ),
             unmapped_character_indices=tuple(
                 int(value) for value in metadata["unmapped_character_indices"]
             ),
