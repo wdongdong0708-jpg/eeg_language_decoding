@@ -84,6 +84,17 @@ def _text_provider(feature_dir: Path) -> object:
     return SpanTextTargetProvider(feature_dir=feature_dir, mode="local_mean")
 
 
+def _selected_book_ids(config: dict[str, object]) -> tuple[str, ...] | None:
+    selection = config.get("selection", {})
+    if not isinstance(selection, dict):
+        raise ValueError("selection configuration must be a mapping")
+    values = selection.get("books")
+    if values is None:
+        return None
+    if not isinstance(values, list) or not values:
+        raise ValueError("selection.books must be a non-empty list")
+    return tuple(dict.fromkeys(str(value) for value in values))
+
 
 def _negative_config(config: dict[str, object]) -> NegativePolicyConfig:
     section = config["loss"]
@@ -210,6 +221,7 @@ def main() -> None:
     feature_dir = args.feature_dir or Path(config["data"]["text_feature_dir"])
     provider = _text_provider(feature_dir)
     semantic_only = bool(config.get("selection", {}).get("semantic_only", False))
+    book_ids = _selected_book_ids(config)
     reader = OfficialBrainVisionSegmentReader()
 
     raw_train_dataset = ChineseEEG1SpanDataset(
@@ -220,6 +232,7 @@ def main() -> None:
         text_target_provider=provider,
         eeg_reader=reader,
         semantic_only=semantic_only,
+        book_ids=book_ids,
     )
     preprocessing_config = config["preprocessing"]
     normalization = str(preprocessing_config["eeg_normalization"])
@@ -240,6 +253,7 @@ def main() -> None:
         "text_target_provider": provider,
         "eeg_reader": reader,
         "semantic_only": semantic_only,
+        "book_ids": book_ids,
     }
     train_dataset = ChineseEEG1SpanDataset(
         index_path, partition="train", **dataset_kwargs
@@ -403,7 +417,8 @@ def main() -> None:
                     "model_kind": "eeg_text_static_d_siglip",
                     "seed": seed,
                     "semantic_only": semantic_only,
-                                "epoch": epoch,
+                    "book_ids": book_ids,
+                    "epoch": epoch,
                     "validation_loss": validation_loss,
                     "validation_macro_recall_at_10": score,
                     "validation_balanced_retrieval": record[
@@ -422,6 +437,7 @@ def main() -> None:
         "experiment": config["experiment"]["name"],
         "seed": seed,
         "span_length": args.span_length,
+        "book_ids": book_ids,
         "train_examples_per_epoch": len(train_dataset),
         "validation_examples": len(validation_dataset),
         "best_epoch": best_epoch,

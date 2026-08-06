@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 from data.chineseeeg1_span_dataset import (
     ChineseEEG1SpanDataset,
@@ -106,3 +107,46 @@ def test_dataset_can_select_only_frozen_semantic_units(tmp_path: Path) -> None:
     )
     assert 0 < len(semantic) < len(unfiltered)
     assert all(semantic[index]["is_semantic_unit"] for index in range(len(semantic)))
+
+
+def test_dataset_can_filter_one_book_before_training(tmp_path: Path) -> None:
+    little_prince = _row()
+    garnettdream = {
+        **_row(),
+        "subject_id": "02",
+        "session_id": "GarnettDream",
+        "book_id": "garnettdream",
+        "global_text_id": "global-2",
+        "eeg_file": "fake-2.eeg",
+        "split_group_id": "group-2",
+        "record_id": "record-2",
+        "block_id": "block-2",
+        "content_id": "content-2",
+    }
+    spans = iter_chineseeeg1_character_spans(
+        [little_prince, garnettdream],
+        record_partitions={"record-1": "train", "record-2": "train"},
+        timeline_audit={"allowed_timeline_methods": ["event_affine"]},
+        spec=CharacterSpanSpec(span_lengths=(4,), neural_delay_ms=0.0),
+    )
+    index = tmp_path / "two-books.parquet"
+    write_character_span_parquet(index, spans)
+
+    dataset = ChineseEEG1SpanDataset(
+        index,
+        partition="train",
+        span_char_count=4,
+        book_ids=("littleprince",),
+        eeg_reader=lambda _file, start, stop: np.ones((2, stop - start)),
+    )
+
+    assert dataset.book_ids == ("littleprince",)
+    assert set(dataset.table["book_id"].to_pylist()) == {"littleprince"}
+    assert len(dataset.subject_index_by_group) == 1
+    with pytest.raises(ValueError, match="book_ids cannot be empty"):
+        ChineseEEG1SpanDataset(
+            index,
+            partition="train",
+            span_char_count=4,
+            book_ids=(),
+        )

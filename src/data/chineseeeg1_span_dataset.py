@@ -279,6 +279,7 @@ class ChineseEEG1SpanDataset(Dataset[dict[str, object]]):
         eeg_reader: Callable[[str, int, int], np.ndarray] | None = None,
         strict_unseen_local_text: bool = False,
         semantic_only: bool = False,
+        book_ids: Sequence[str] | None = None,
     ) -> None:
         if partition not in {"train", "validation", "test"}:
             raise ValueError(f"Unknown partition: {partition}")
@@ -294,6 +295,13 @@ class ChineseEEG1SpanDataset(Dataset[dict[str, object]]):
             raise ValueError(
                 "train_recording_robust_clamp requires a train-fitted scaler"
             )
+        normalized_book_ids = (
+            None
+            if book_ids is None
+            else tuple(dict.fromkeys(str(book_id) for book_id in book_ids))
+        )
+        if normalized_book_ids is not None and not normalized_book_ids:
+            raise ValueError("book_ids cannot be empty when provided")
         index_path = Path(index_path)
         available_columns = set(pq.ParquetFile(index_path).schema.names)
         if semantic_only and "is_semantic_unit" not in available_columns:
@@ -306,6 +314,8 @@ class ChineseEEG1SpanDataset(Dataset[dict[str, object]]):
         ]
         if semantic_only:
             filters.append(("is_semantic_unit", "=", True))
+        if normalized_book_ids is not None:
+            filters.append(("book_id", "in", list(normalized_book_ids)))
         table = pq.read_table(
             index_path,
             columns=DATASET_COLUMNS
@@ -325,6 +335,10 @@ class ChineseEEG1SpanDataset(Dataset[dict[str, object]]):
             ]
             if semantic_only:
                 train_filters.append(("is_semantic_unit", "=", True))
+            if normalized_book_ids is not None:
+                train_filters.append(
+                    ("book_id", "in", list(normalized_book_ids))
+                )
             train_ids = pc.unique(
                 pq.read_table(
                     index_path,
@@ -346,10 +360,15 @@ class ChineseEEG1SpanDataset(Dataset[dict[str, object]]):
         if len(model_lengths) != 1:
             raise ValueError("A fixed-span dataset must have one model EEG length")
 
+        subject_filters = None
+        if normalized_book_ids is not None:
+            subject_filters = [("book_id", "in", list(normalized_book_ids))]
         all_subjects = pc.unique(
-            pq.read_table(index_path, columns=["subject_group_id"])[
-                "subject_group_id"
-            ]
+            pq.read_table(
+                index_path,
+                columns=["subject_group_id"],
+                filters=subject_filters,
+            )["subject_group_id"]
         ).to_pylist()
         self.subject_index_by_group = {
             str(group_id): index for index, group_id in enumerate(sorted(all_subjects))
@@ -358,6 +377,7 @@ class ChineseEEG1SpanDataset(Dataset[dict[str, object]]):
         self.partition = partition
         self.span_char_count = span_char_count
         self.semantic_only = semantic_only
+        self.book_ids = normalized_book_ids
         self.model_eeg_sample_count = int(model_lengths[0])
         self.eeg_normalization = eeg_normalization
         self.eeg_scaler = eeg_scaler

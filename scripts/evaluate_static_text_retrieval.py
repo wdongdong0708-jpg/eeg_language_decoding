@@ -38,6 +38,15 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _checkpoint_book_ids(checkpoint: dict[str, object]) -> tuple[str, ...] | None:
+    values = checkpoint.get("book_ids")
+    if values is None:
+        selection = checkpoint["config"].get("selection", {})
+        values = selection.get("books")
+    if values is None:
+        return None
+    return tuple(str(value) for value in values)
+
 
 def _relative(observed: object, random: object) -> dict[str, float]:
     return {
@@ -65,6 +74,7 @@ def main() -> None:
     provider = ConsolidatedStaticSpanTextTargetProvider(feature_dir)
     scaler = ChannelRobustScaler.from_state_dict(checkpoint["eeg_scaler"])
     semantic_only = bool(checkpoint["semantic_only"])
+    book_ids = _checkpoint_book_ids(checkpoint)
     test_dataset = ChineseEEG1SpanDataset(
         span_index,
         partition="test",
@@ -72,6 +82,7 @@ def main() -> None:
         eeg_normalization="train_recording_robust_clamp",
         eeg_scaler=scaler,
         semantic_only=semantic_only,
+        book_ids=book_ids,
     )
     sample = test_dataset[0]
     first_row = test_dataset.table.slice(0, 1).to_pylist()[0]
@@ -128,7 +139,8 @@ def main() -> None:
             span_char_count=span_length,
             eeg_normalization="none",
             semantic_only=semantic_only,
-            )
+            book_ids=book_ids,
+        )
         shortcut_result = evaluate_seen_text_shortcuts(
             train_dataset.table.to_pylist(),
             test_dataset.table.to_pylist(),
@@ -172,6 +184,7 @@ def main() -> None:
             checkpoint["validation_macro_recall_at_10"]
         ),
         "span_length": span_length,
+        "book_ids": book_ids,
         "span_index": span_index.as_posix(),
         "query_count": result.query_count,
         "candidate_count": result.candidate_count,
