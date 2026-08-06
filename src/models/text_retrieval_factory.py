@@ -90,6 +90,9 @@ def build_eeg_text_retrieval_model(
             sequence_axis="last",
             pooling=str(model_config["eeg_temporal_pooling"]),
             dropout=float(model_config.get("projection_dropout", 0.1)),
+            bahdanau_attention_hidden_size=int(
+                model_config.get("bahdanau_attention_hidden_size", 256)
+            ),
         ),
         text_sequence_pooler=text_sequence_pooler,
         text_projection=text_projection,

@@ -2,7 +2,11 @@ import torch
 from torch import nn
 
 from models.losses import MaskedSoftTargetContrastiveLoss
-from models.projection_head import AttentionPool1d, PooledProjectionHead
+from models.projection_head import (
+    AttentionPool1d,
+    BahdanauAttention,
+    PooledProjectionHead,
+)
 from models.retrieval_model import EEGTextRetrievalModel
 
 
@@ -48,3 +52,43 @@ def test_eeg_text_model_can_emit_normalized_static_embeddings() -> None:
     text = model.encode_text(torch.randn(3, 4))
     assert torch.allclose(eeg.norm(dim=1), torch.ones(3), atol=1e-5)
     assert torch.allclose(text.norm(dim=1), torch.ones(3), atol=1e-5)
+
+
+
+def test_bahdanau_attention_pools_feature_first_sequence() -> None:
+    pooling = BahdanauAttention(input_size=5, hidden_size=11)
+    keys = torch.randn(3, 5, 17, requires_grad=True)
+
+    weights = pooling.attention_weights(keys)
+    output = pooling(keys)
+
+    assert weights.shape == (3, 1, 17)
+    assert torch.allclose(weights.sum(dim=-1), torch.ones(3, 1), atol=1e-6)
+    assert output.shape == (3, 5, 1)
+    output.square().sum().backward()
+    assert pooling.Wa.weight.grad is not None
+    assert pooling.Va.weight.grad is not None
+
+
+def test_bahdanau_attention_supports_optional_queries() -> None:
+    pooling = BahdanauAttention(input_size=5, hidden_size=11)
+    keys = torch.randn(3, 5, 17)
+    queries = torch.randn(3, 5, 17, requires_grad=True)
+
+    pooling(keys, queries).sum().backward()
+
+    assert pooling.Ua.weight.grad is not None
+
+
+def test_pooled_projection_head_supports_bahdanau_attention() -> None:
+    projection = PooledProjectionHead(
+        5,
+        7,
+        sequence_axis="last",
+        pooling="bahdanau_attention",
+        bahdanau_attention_hidden_size=11,
+    )
+
+    output = projection(torch.randn(3, 5, 17))
+
+    assert output.shape == (3, 7)
